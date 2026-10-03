@@ -47,15 +47,17 @@
     overflow: hidden;
   }
 
-  .hero-audit-wrap {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    max-width: none;
-    height: 100%;
-    margin: 0;
-  }
+.hero-audit-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  width: var(--hero-image-size, 48%);
+  max-width: none !important;
+  height: 100%;
+  margin: 0;
+}
 
   .hero-audit-frame {
     position: absolute;
@@ -91,14 +93,17 @@
     overflow: hidden;
   }
 
-  .hero-audit-wrap {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    max-width: none;
-    height: 100%;
-  }
+.hero-audit-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  width: var(--hero-image-size, 48%);
+  max-width: none !important;
+  height: 100%;
+  margin: 0;
+}
 
   .hero-audit-frame {
     position: absolute;
