@@ -1,64 +1,43 @@
-/*
-  Shelvion Hero Shelf Audit
-  Full replacement CSS
-
-  Layout rules:
-  - Hero has one navy area.
-  - Hero image width is controlled by the Admin imageSize value.
-  - Image height follows 16:9 proportion.
-  - Hero section height follows the image height.
-  - Text is layered above the image.
-  - At 100%, the image covers the full Hero width.
-  - Calibration coordinates use the displayed image itself as the reference.
-*/
+/* =========================================================
+   SHELVION HERO SHELF AUDIT
+   Clean Hero layout
+   ========================================================= */
 
 /* =========================================================
-   HERO CONTAINER
+   HERO
    ========================================================= */
 
 .hero {
   position: relative;
-  display: block;
+
   width: 100%;
+  min-height: 0;
+  height: auto;
+
+  margin-top: 68px;
+
   padding: 0;
+
   overflow: hidden;
+
+  display: block;
+
   background: #0F3A5A !important;
   color: #fff;
 }
 
 /*
-  The text is removed from normal flow so the image wrapper
-  becomes the element that determines Hero height.
-*/
-.hero-copy {
-  position: absolute;
-  top: 50%;
-  left: 8vw;
-  z-index: 20;
-  width: min(760px, 72%);
-  max-width: 760px;
-  transform: translateY(-50%);
-  background: transparent !important;
-}
-
-/* =========================================================
-   HERO IMAGE WRAPPER
-   ========================================================= */
-
-/*
-  IMPORTANT:
-  PublicSite / HeroShelfAudit passes the selected imageSize
-  as an inline width. Do not use width:100% here.
-
-  Because this wrapper is in normal flow and has a 16:9
-  aspect ratio, the wrapper determines the Hero height.
+  The Hero image is the normal-flow element.
+  Therefore its 16:9 height determines the Hero height.
 */
 .hero-audit-wrap {
   position: relative;
+
   display: block;
 
   width: var(--hero-image-size, 48%);
   height: auto;
+
   aspect-ratio: 16 / 9;
 
   margin-left: auto;
@@ -70,30 +49,80 @@
 }
 
 /* =========================================================
-   IMAGE / FRAME
+   HERO TEXT
+   ========================================================= */
+
+/*
+  Text is layered over the Hero.
+  It does NOT determine Hero height.
+*/
+.hero-copy {
+  position: absolute;
+
+  top: 50%;
+  left: 8vw;
+
+  width: min(760px, 72%);
+  max-width: 760px;
+
+  transform: translateY(-50%);
+
+  z-index: 20;
+
+  background: transparent !important;
+
+  pointer-events: auto;
+}
+
+.hero-copy .eyebrow {
+  color: #4ECACE;
+}
+
+.hero-copy h1 {
+  color: #fff;
+}
+
+.hero-copy p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* =========================================================
+   FRAME
    ========================================================= */
 
 .hero-audit-frame {
   position: relative;
+
   width: 100%;
   height: 100%;
+
   aspect-ratio: auto;
 
   overflow: hidden;
 
   border: 0;
   border-radius: 0;
+
   background: #0b2437;
+
   box-shadow: none;
 }
 
+/* =========================================================
+   MAIN IMAGE
+   ========================================================= */
+
 /*
-  Use fill rather than cover.
-  This keeps every percentage calibration coordinate
-  aligned with the actual displayed image area.
+  IMPORTANT:
+  object-fit: fill keeps the whole source image visible.
+
+  This makes calibration coordinates:
+  x / y / w / h
+  correspond directly to the displayed image.
 */
 .hero-audit-img {
   position: absolute;
+
   inset: 0;
 
   z-index: 1;
@@ -104,12 +133,34 @@
   object-fit: fill;
 
   display: block;
+
   visibility: visible;
   opacity: 1;
 }
 
+/* =========================================================
+   DARK MASK
+   ========================================================= */
+
+.hero-audit-dim {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 2;
+
+  background: rgba(0, 0, 0, 0.42);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   BRAND SPOTLIGHT
+   ========================================================= */
+
 .hero-audit-spotlight {
   position: absolute;
+
   inset: 0;
 
   z-index: 3;
@@ -126,38 +177,28 @@
 
 .hero-audit-spotlight img {
   position: absolute;
+
   inset: 0;
 
   width: 100%;
   height: 100%;
 
   object-fit: fill;
+
   filter: brightness(1.03);
 }
 
 /* =========================================================
-   DARKENING / READABILITY
+   SOFT LEFT GRADIENT
+   Helps white text remain readable when the image overlaps
+   the text area.
    ========================================================= */
 
-.hero-audit-dim {
-  position: absolute;
-  inset: 0;
-
-  z-index: 2;
-
-  background: rgba(0, 0, 0, 0.42);
-
-  pointer-events: none;
-}
-
-/*
-  Dark-to-transparent layer toward the text side.
-  This is an image overlay, not a text background.
-*/
 .hero-audit-wrap::after {
   content: "";
 
   position: absolute;
+
   inset: 0;
 
   z-index: 4;
@@ -166,9 +207,10 @@
 
   background: linear-gradient(
     90deg,
-    rgba(15, 58, 90, 0.78) 0%,
-    rgba(15, 58, 90, 0.46) 28%,
-    rgba(15, 58, 90, 0.12) 58%,
+    rgba(15, 58, 90, 0.84) 0%,
+    rgba(15, 58, 90, 0.58) 24%,
+    rgba(15, 58, 90, 0.24) 48%,
+    rgba(15, 58, 90, 0.05) 68%,
     transparent 100%
   );
 }
@@ -232,7 +274,7 @@
 }
 
 /* =========================================================
-   STATUS LABEL
+   STATUS
    ========================================================= */
 
 .hero-audit-status {
@@ -244,7 +286,9 @@
   z-index: 10;
 
   font-family: 'IBM Plex Mono', monospace;
+
   font-size: 0.62rem;
+
   letter-spacing: 0.1em;
 
   color: #fff;
@@ -252,26 +296,27 @@
   background: rgba(20, 25, 30, 0.74);
 
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 3px;
 
   padding: 0.48rem 0.7rem;
+
+  border-radius: 3px;
 
   backdrop-filter: blur(8px);
 }
 
 .hero-audit-status::before {
-  content: '';
+  content: "";
 
   display: inline-block;
 
   width: 5px;
   height: 5px;
 
+  margin-right: 0.45rem;
+
   border-radius: 50%;
 
   background: var(--brand-color);
-
-  margin-right: 0.45rem;
 
   box-shadow: 0 0 8px var(--brand-color);
 }
@@ -287,11 +332,11 @@
 
   border: 1px solid var(--brand-color);
 
+  border-radius: 3px;
+
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.06),
     0 0 18px var(--brand-color);
-
-  border-radius: 3px;
 
   opacity: 0;
 
@@ -309,9 +354,11 @@
   opacity: 1;
 }
 
+/* top-left / bottom-right corners */
+
 .hero-audit-box::before,
 .hero-audit-box::after {
-  content: '';
+  content: "";
 
   position: absolute;
 
@@ -337,6 +384,8 @@
 
   border-width: 0 2px 2px 0;
 }
+
+/* top-right / bottom-left corners */
 
 .hero-audit-box .corner-tr,
 .hero-audit-box .corner-bl {
@@ -364,7 +413,7 @@
 }
 
 /* =========================================================
-   INFORMATION CARDS
+   BRAND / PRODUCT CARDS
    ========================================================= */
 
 .hero-audit-brand-card,
@@ -385,6 +434,7 @@
   backdrop-filter: blur(10px);
 
   font-family: 'IBM Plex Mono', monospace;
+
   color: #fff;
 
   opacity: 0;
@@ -402,8 +452,11 @@
 .hero-audit-product-card.show,
 .hero-audit-complete.show {
   opacity: 1;
+
   transform: translateY(0);
 }
+
+/* Brand card */
 
 .hero-audit-brand-card {
   top: 18%;
@@ -414,13 +467,17 @@
   padding: 0.7rem 0.8rem;
 
   font-size: 0.61rem;
+
   line-height: 1.65;
 }
+
+/* Card label */
 
 .hero-audit-card-label {
   color: rgba(255, 255, 255, 0.46);
 
   text-transform: uppercase;
+
   letter-spacing: 0.08em;
 
   font-size: 0.5rem;
@@ -428,69 +485,30 @@
   margin-bottom: 0.2rem;
 }
 
+/* Prevent typewriter text from wrapping */
+
 .hero-audit-card-value {
   white-space: nowrap;
 }
 
+/* Product card */
+
 .hero-audit-product-card {
   min-width: 190px;
+
   max-width: 250px;
 
   padding: 0.7rem 0.8rem;
 
   font-size: 0.58rem;
+
   line-height: 1.6;
 
   white-space: nowrap;
 }
 
 /* =========================================================
-   AUDIT COMPLETE
-   ========================================================= */
-
-.hero-audit-complete {
-  inset: 50% auto auto 50%;
-
-  transform: translate(-50%, -45%);
-
-  width: min(270px, 76%);
-
-  padding: 1rem;
-
-  text-align: center;
-}
-
-.hero-audit-complete.show {
-  transform: translate(-50%, -50%);
-}
-
-.hero-audit-complete .title {
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-
-  color: #fff;
-
-  margin-bottom: 0.65rem;
-}
-
-.hero-audit-complete .line {
-  font-size: 0.56rem;
-
-  color: rgba(255, 255, 255, 0.55);
-
-  margin: 0.25rem 0;
-}
-
-.hero-audit-complete .ok {
-  margin-top: 0.5rem;
-
-  color: #4ECACE;
-
-  font-size: 0.58rem;
-}
-
-/* =========================================================
-   PRODUCT MARKER
+   PRODUCT DETECTION MARKER
    ========================================================= */
 
 .hero-audit-product-marker {
@@ -517,11 +535,12 @@
 
 .hero-audit-product-marker.show {
   opacity: 1;
+
   transform: scale(1);
 }
 
 .hero-audit-product-marker::after {
-  content: '';
+  content: "";
 
   position: absolute;
 
@@ -533,6 +552,52 @@
 
   border-top: 2px solid var(--brand-color);
   border-left: 2px solid var(--brand-color);
+}
+
+/* =========================================================
+   AUDIT COMPLETE
+   ========================================================= */
+
+.hero-audit-complete {
+  inset: 50% auto auto 50%;
+
+  width: min(270px, 76%);
+
+  padding: 1rem;
+
+  text-align: center;
+
+  transform: translate(-50%, -45%);
+}
+
+.hero-audit-complete.show {
+  transform: translate(-50%, -50%);
+}
+
+.hero-audit-complete .title {
+  color: #fff;
+
+  font-size: 0.72rem;
+
+  letter-spacing: 0.12em;
+
+  margin-bottom: 0.65rem;
+}
+
+.hero-audit-complete .line {
+  color: rgba(255, 255, 255, 0.55);
+
+  font-size: 0.56rem;
+
+  margin: 0.25rem 0;
+}
+
+.hero-audit-complete .ok {
+  margin-top: 0.5rem;
+
+  color: #4ECACE;
+
+  font-size: 0.58rem;
 }
 
 /* =========================================================
@@ -550,14 +615,12 @@
 }
 
 /* =========================================================
-   MOBILE
+   TABLET
    ========================================================= */
 
 @media (max-width: 800px) {
   .hero {
-    display: block;
-
-    width: 100%;
+    margin-top: 68px;
 
     min-height: 0;
 
@@ -566,23 +629,11 @@
     background: #0F3A5A !important;
   }
 
-  .hero-copy {
-    position: absolute;
-
-    top: 50%;
-    left: 6vw;
-
-    width: 88%;
-    max-width: none;
-
-    transform: translateY(-50%);
-
-    z-index: 20;
-  }
-
+  /*
+    On mobile the image occupies the full width.
+    Its 16:9 ratio determines Hero height.
+  */
   .hero-audit-wrap {
-    position: relative;
-
     width: 100% !important;
 
     height: auto;
@@ -594,21 +645,23 @@
     max-width: none !important;
   }
 
-  .hero-audit-frame {
-    width: 100%;
-    height: 100%;
+  .hero-copy {
+    top: 50%;
+    left: 6vw;
 
-    aspect-ratio: auto;
+    width: 88%;
+    max-width: 88%;
 
-    border-radius: 0;
+    transform: translateY(-50%);
   }
 
-  .hero-audit-img,
-  .hero-audit-spotlight img {
-    width: 100%;
-    height: 100%;
+  .hero-copy h1 {
+    font-size: clamp(34px, 9vw, 58px);
+  }
 
-    object-fit: fill;
+  .hero-copy p {
+    font-size: 15px;
+    line-height: 1.55;
   }
 
   .hero-audit-brand-card {
@@ -622,15 +675,43 @@
 
   .hero-audit-product-card {
     min-width: 160px;
+
     max-width: 200px;
 
     font-size: 0.51rem;
   }
 }
 
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
 @media (max-width: 620px) {
+  .hero-copy {
+    left: 5vw;
+
+    width: 90%;
+    max-width: 90%;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(30px, 8.5vw, 42px);
+
+    margin-bottom: 14px;
+  }
+
+  .hero-copy p {
+    font-size: 13px;
+
+    line-height: 1.45;
+  }
+
   .hero-audit-status {
+    top: 10px;
+    left: 10px;
+
     font-size: 0.5rem;
+
     padding: 0.4rem 0.55rem;
   }
 
@@ -647,8 +728,9 @@
   }
 
   .hero-audit-product-card {
-    max-width: 155px;
     min-width: 130px;
+
+    max-width: 155px;
 
     padding: 0.55rem;
 
