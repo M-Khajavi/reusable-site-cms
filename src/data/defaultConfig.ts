@@ -44,7 +44,7 @@ const heroCalibration: HeroBrandCalibration[] = [
   },
 ]
 export const defaultConfig:SiteConfig={
- brand:{name:'Northstar',tagline:'A reusable modern website template'},
+ brand:{name:'Northstar',tagline:'A reusable modern website template',logo:''},
  theme:{primary:'#2575A7',secondary:'#4ECACE',ink:'#231F20',paper:'#F7F9FA',grey:'#E4E9ED',accent:'#FF5A36',dark:'#0F3A5A'},
  nav:[{label:'How it works',href:'#steps'},{label:'Insights',href:'#articles'},{label:'News',href:'#news'},{label:'Network',href:'#people'}],
  sections:[
@@ -57,6 +57,8 @@ export const defaultConfig:SiteConfig={
    secondaryCta:'See how it works',
    image:'assets/hero-image-coffee.png',
    imageSize:48,
+   titleSize:100,
+   textColor:'#FFFFFF',
    calibration:heroCalibration
  },
  stats:[{value:'01',label:'Reusable system'},{value:'TSX',label:'Typed components'},{value:'Admin',label:'Content controls'},{value:'Local',label:'Easy to test'}],
