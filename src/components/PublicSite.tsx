@@ -14,10 +14,12 @@ export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: (
 
     {enabled('hero') && <section className="hero">
       <div className="hero-copy"><span className="eyebrow">{config.hero.eyebrow}</span><h1>{config.hero.title}</h1><p>{config.hero.subtitle}</p><div className="buttons"><a className="primary" href="#cta">{config.hero.primaryCta}</a><a className="outline" href="#steps">{config.hero.secondaryCta}</a></div></div>
-      {config.hero.image ? <HeroShelfAudit
-  image={config.hero.image}
-  brands={config.hero.calibration}
-/> : <div className="hero-visual hero-image-placeholder" aria-label="Hero image">Upload a Hero image in Admin</div>}
+      <HeroShelfAudit
+        image={config.hero.image}
+        brands={config.hero.calibration}
+        imageSize={heroSize}
+      />
+       : <div className="hero-visual hero-image-placeholder" aria-label="Hero image">Upload a Hero image in Admin</div>}
     </section>}
 
     {enabled('stats') && <section className="stats">{config.stats.map(s => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}</section>}
