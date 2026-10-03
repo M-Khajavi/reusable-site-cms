@@ -90,7 +90,8 @@ export function PublicSite({
   )
 
   const footerAppearance = sectionConfig('footer')?.appearance
-  const headerBorderColor = footerAppearance?.backgroundColor || '#231F20'
+  const headerColor = config.theme.headerFooter || footerAppearance?.backgroundColor || '#231F20'
+  const headerTextColor = footerAppearance?.fontColor || '#FFFFFF'
 
   const renderMenuLink = (
     item: {
@@ -130,7 +131,12 @@ export function PublicSite({
   return (
     <div
       className="site"
-      style={{ '--header-border-color': headerBorderColor } as CSSProperties}
+      style={
+        {
+          '--header-color': headerColor,
+          '--header-text-color': headerTextColor,
+        } as CSSProperties
+      }
     >
       <nav className="nav">
         <a className="brand" href="#">
@@ -381,8 +387,10 @@ export function PublicSite({
           />
           <div className="three">
             {config.segments.map(segment => (
-              <article className="card" key={segment.title}>
-                <div className="icon" />
+              <article className="card segment-card" key={segment.title}>
+                <div className="segment-icon" aria-hidden="true">
+                  {segment.icon || '✦'}
+                </div>
                 <h3>{segment.title}</h3>
                 <p>{segment.description}</p>
                 <ul>
@@ -658,7 +666,7 @@ function ArticleCollection({
         </div>
         <a
           className="collection-link"
-          href={id === 'news' ? '#news' : '#articles'}
+          href={config.viewAllHref || (id === 'news' ? '#news' : '#articles')}
         >
           View all {id}
         </a>
@@ -697,8 +705,8 @@ function NetworkSection({
             <Header eyebrow="Our network" title={config.heading} />
             <p className="lead">{config.subtitle}</p>
           </div>
-          <a className="collection-link" href="#cta">
-            Join the network
+          <a className="collection-link" href={config.pageHref || '#cta'}>
+            network page
           </a>
         </div>
 
@@ -738,8 +746,8 @@ function NetworkSection({
           <Header eyebrow="Our network" title={config.heading} />
           <p className="lead">{config.subtitle}</p>
         </div>
-        <a className="collection-link" href="#cta">
-          Join the network
+        <a className="collection-link" href={config.pageHref || '#cta'}>
+          network page
         </a>
       </div>
 
