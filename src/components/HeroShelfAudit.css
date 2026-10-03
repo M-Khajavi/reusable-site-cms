@@ -8,3 +8,10 @@
 .hero-audit-product-marker{position:absolute;z-index:10;border:1px solid var(--brand-color);border-radius:2px;opacity:0;transform:scale(.96);transition:opacity .2s ease,transform .25s ease;box-shadow:0 0 12px var(--brand-color);pointer-events:none}.hero-audit-product-marker.show{opacity:1;transform:scale(1)}.hero-audit-product-marker::after{content:'';position:absolute;left:-1px;top:-1px;width:7px;height:7px;border-top:2px solid var(--brand-color);border-left:2px solid var(--brand-color)}
 @media(max-width:800px){.hero-audit-wrap{max-width:none}.hero-audit-frame{aspect-ratio:16/9}.hero-audit-brand-card{right:2%;top:10%;min-width:155px;font-size:.54rem}.hero-audit-product-card{min-width:160px;max-width:200px;font-size:.51rem}}@media(max-width:620px){.hero-audit-status{font-size:.5rem;padding:.4rem .55rem}.hero-audit-brand-card{top:auto;right:2%;bottom:2%;min-width:145px;padding:.55rem;font-size:.49rem}.hero-audit-product-card{max-width:155px;min-width:130px;padding:.55rem;font-size:.47rem}}
 @media(prefers-reduced-motion:reduce){.hero-audit-scan{animation:none!important}.hero-audit-frame.scanning .hero-audit-scan{display:none}}
+.hero-audit-card-value {
+  white-space: nowrap;
+}
+
+.hero-audit-product-card {
+  white-space: nowrap;
+}
