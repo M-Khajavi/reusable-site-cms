@@ -15,9 +15,7 @@ export function HeroShelfAudit({
   imageSize: number
 }) {
   const [brandIndex, setBrandIndex] = useState(0)
-  const [stage, setStage] = useState<
-    'scanning' | 'brand' | 'complete'
-  >('scanning')
+  const [stage, setStage] = useState<'scanning' | 'brand'>('scanning')
   const [productIndex, setProductIndex] = useState(-1)
   const [brandText, setBrandText] = useState('')
   const [productText, setProductText] = useState('')
@@ -51,7 +49,7 @@ export function HeroShelfAudit({
       setter: (value: string) => void,
       speed: number,
     ) => {
-      let output: string[] = []
+      const output: string[] = []
 
       for (const line of lines) {
         let current = ''
@@ -78,7 +76,6 @@ export function HeroShelfAudit({
       setProductText('')
 
       await sleep(1900)
-
       if (cancelled) return
 
       setStage('brand')
@@ -94,11 +91,7 @@ export function HeroShelfAudit({
 
       if (cancelled) return
 
-      for (
-        let i = 0;
-        i < brand.products.length;
-        i += 1
-      ) {
+      for (let i = 0; i < brand.products.length; i += 1) {
         if (cancelled) return
 
         setProductIndex(i)
@@ -118,33 +111,23 @@ export function HeroShelfAudit({
 
         setProductIndex(-1)
         setProductText('')
-
         await sleep(140)
       }
 
       if (cancelled) return
 
+      /*
+        No total report here.
+        After the current brand finishes, move directly to
+        the next brand. After the last brand, this wraps to
+        the first brand and starts the cycle again.
+      */
       setStage('scanning')
       await sleep(760)
 
       if (cancelled) return
 
-      const next =
-        (safeBrandIndex + 1) % brands.length
-
-      if (next === 0) {
-        setStage('complete')
-
-        await sleep(1900)
-
-        if (cancelled) return
-
-        setStage('scanning')
-        await sleep(360)
-      }
-
-      if (cancelled) return
-
+      const next = (safeBrandIndex + 1) % brands.length
       setBrandIndex(next)
     }
 
@@ -155,29 +138,23 @@ export function HeroShelfAudit({
     }
   }, [brand, brands, safeBrandIndex])
 
-  if (!brand) {
-    return null
-  }
+  if (!brand) return null
 
-return (
-<div
-  className="hero-audit-wrap"
-  style={{
-    width: `${imageSize}%`,
-    height: 'auto',
-    aspectRatio: '16 / 9',
-  }}
->
+  return (
+    <div
+      className="hero-audit-wrap"
+      style={{
+        width: `${imageSize}%`,
+        height: 'auto',
+        aspectRatio: '16 / 9',
+      }}
+    >
       <div
-        className={`hero-audit-frame ${
-          stage === 'scanning' ? 'scanning' : ''
-        }`}
-        style={
-          {
-            '--brand-color': brand.color,
-            ...spotStyle,
-          } as CSSProperties
-        }
+        className={`hero-audit-frame ${stage === 'scanning' ? 'scanning' : ''}`}
+        style={{
+          '--brand-color': brand.color,
+          ...spotStyle,
+        } as CSSProperties}
       >
         <img
           className="hero-audit-img"
@@ -196,15 +173,11 @@ return (
         <div className="hero-audit-status">
           {stage === 'scanning'
             ? 'SCANNING SHELF...'
-            : stage === 'complete'
-              ? 'AUDIT COMPLETE'
-              : 'ANALYSING PRODUCTS...'}
+            : 'ANALYSING PRODUCTS...'}
         </div>
 
         <div
-          className={`hero-audit-box ${
-            stage === 'brand' ? 'active' : ''
-          }`}
+          className={`hero-audit-box ${stage === 'brand' ? 'active' : ''}`}
           style={{
             left: `${brand.area.x}%`,
             top: `${brand.area.y}%`,
@@ -217,18 +190,14 @@ return (
         </div>
 
         <div
-          className={`hero-audit-brand-card ${
-            stage === 'brand' ? 'show' : ''
-          }`}
+          className={`hero-audit-brand-card ${stage === 'brand' ? 'show' : ''}`}
         >
           <div className="hero-audit-card-label">
             Detected brand
           </div>
 
           <div className="hero-audit-card-value">
-            {(
-              brandText || `Brand: ${brand.name}`
-            )
+            {(brandText || `Brand: ${brand.name}`)
               .split('\n')
               .map((line, i) => (
                 <div key={i}>{line}</div>
@@ -253,10 +222,7 @@ return (
               style={{
                 left: `${Math.min(
                   64,
-                  Math.max(
-                    2,
-                    product.x + product.w + 1,
-                  ),
+                  Math.max(2, product.x + product.w + 1),
                 )}%`,
                 top: `${Math.min(
                   76,
@@ -264,31 +230,12 @@ return (
                 )}%`,
               }}
             >
-              {productText
-                .split('\n')
-                .map((line, i) => (
-                  <div key={i}>{line}</div>
-                ))}
+              {productText.split('\n').map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
             </div>
           </>
         )}
-
-        <div
-          className={`hero-audit-complete ${
-            stage === 'complete' ? 'show' : ''
-          }`}
-        >
-          <div className="title">AUDIT COMPLETE</div>
-          <div className="line">
-            Brands detected: 3
-          </div>
-          <div className="line">
-            Facings detected: 15
-          </div>
-          <div className="ok">
-            Structured result ready
-          </div>
-        </div>
       </div>
     </div>
   )
