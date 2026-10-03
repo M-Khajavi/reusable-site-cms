@@ -210,7 +210,32 @@ function HeroEditor({ config, update, pickImage }: { config: SiteConfig; update:
       <Field label="Secondary button" value={config.hero.secondaryCta} onChange={v => update(c => c.hero.secondaryCta = v)} />
     </div>
     <ImageEditor label="Hero image" value={config.hero.image} onChange={v => update(c => c.hero.image = v)} onUpload={() => pickImage('hero')} />
-   
+     <label className="admin-field">
+      <span>Hero image width (%)</span>
+    
+      <input
+        type="range"
+        min="25"
+        max="100"
+        step="1"
+        value={config.hero.imageSize ?? 48}
+        onChange={e =>
+          update(c => {
+            c.hero.imageSize = Number(e.target.value)
+          })
+        }
+      />
+    
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <small>25%</small>
+        <strong>{config.hero.imageSize ?? 48}%</strong>
+        <small>100%</small>
+      </div>
+    
+      <small className="field-help">
+        100% makes the Hero image cover the full Hero width.
+      </small>
+    </label>
   </Panel>
 }
 
