@@ -16,7 +16,12 @@ export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: (
     <nav className="nav"><a className="brand" href="#">{config.brand.name}</a><div className="navlinks">{config.nav.map(n => <a key={n.href} href={n.href}>{n.label}</a>)}<a className="navcta" href="#cta">Get started</a></div></nav>
 
 {enabled('hero') && (
-  <section className="hero">
+  <section
+  className="hero"
+  style={{
+    background: '#0F3A5A',
+  }}
+>
     <div className="hero-copy">
       <span className="eyebrow">{config.hero.eyebrow}</span>
       <h1>{config.hero.title}</h1>
