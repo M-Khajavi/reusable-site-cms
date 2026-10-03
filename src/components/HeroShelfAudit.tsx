@@ -8,9 +8,11 @@ const sleep = (ms: number) =>
 export function HeroShelfAudit({
   image,
   brands,
+  imageSize,
 }: {
   image: string
   brands: HeroBrandCalibration[]
+  imageSize: number
 }) {
   const [brandIndex, setBrandIndex] = useState(0)
   const [stage, setStage] = useState<
