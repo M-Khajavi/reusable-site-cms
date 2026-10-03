@@ -9,12 +9,41 @@ export interface ContentBlock { title:string; eyebrow:string; body:string; image
 export interface Article { title:string; category:string; excerpt:string; date:string }
 export interface Person { name:string; role:string; region:string; bio:string }
 export interface PrincipleLine { text:string; highlighted:boolean }
+export interface HeroProductCalibration {
+  variant: string
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
+export interface HeroBrandCalibration {
+  name: string
+  facing: number
+  color: string
+  area: {
+    x: number
+    y: number
+    w: number
+    h: number
+  }
+  products: HeroProductCalibration[]
+}
 export interface SiteConfig {
   brand:{name:string; tagline:string};
   theme:{primary:string; secondary:string; ink:string; paper:string; grey:string; accent:string; dark:string};
   nav:{label:string; href:string}[];
   sections:Section[];
-  hero:{eyebrow:string; title:string; subtitle:string; primaryCta:string; secondaryCta:string; image:string; imageSize:number};
+  hero:{
+    eyebrow:string
+    title:string
+    subtitle:string
+    primaryCta:string
+    secondaryCta:string
+    image:string
+    imageSize:number
+    calibration:HeroBrandCalibration[]
+  };
   stats:Stat[]; steps:Step[]; findings:Finding[]; report:{title:string; store:string; category:string; metrics:{label:string;value:string}[]};
   segments:Segment[]; blocks:ContentBlock[];
   articles:{heading:string; subtitle:string; effect:EffectType; items:Article[]};
