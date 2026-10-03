@@ -7,20 +7,47 @@ const EFFECTS: EffectType[] = ['card effect', 'rec_move_left', 'rec_move_2x', 'c
 
 export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: () => void }) {
   const enabled = (id: string) => config.sections.find(s => s.id === id)?.enabled
-  const heroSize = 100
+ const heroSize = Math.min(
+  100,
+  Math.max(25, Number(config.hero.imageSize || 48))
+)
   
   return <div className="site" style={{ '--primary': config.theme.primary, '--secondary': config.theme.secondary, '--ink': config.theme.ink, '--paper': config.theme.paper, '--grey': config.theme.grey, '--accent': config.theme.accent, '--dark': config.theme.dark, '--hero-image-size': `${heroSize}%` } as CSSProperties}>
     <nav className="nav"><a className="brand" href="#">{config.brand.name}</a><div className="navlinks">{config.nav.map(n => <a key={n.href} href={n.href}>{n.label}</a>)}<a className="navcta" href="#cta">Get started</a></div></nav>
 
-    {enabled('hero') && <section className="hero">
-      <div className="hero-copy"><span className="eyebrow">{config.hero.eyebrow}</span><h1>{config.hero.title}</h1><p>{config.hero.subtitle}</p><div className="buttons"><a className="primary" href="#cta">{config.hero.primaryCta}</a><a className="outline" href="#steps">{config.hero.secondaryCta}</a></div></div>
+{enabled('hero') && (
+  <section className="hero">
+    <div className="hero-copy">
+      <span className="eyebrow">{config.hero.eyebrow}</span>
+      <h1>{config.hero.title}</h1>
+      <p>{config.hero.subtitle}</p>
+
+      <div className="buttons">
+        <a className="primary" href="#cta">
+          {config.hero.primaryCta}
+        </a>
+        <a className="outline" href="#steps">
+          {config.hero.secondaryCta}
+        </a>
+      </div>
+    </div>
+
+    {config.hero.image ? (
       <HeroShelfAudit
         image={config.hero.image}
-        brands={config.hero.calibration}
+        brands={config.hero.calibration ?? []}
         imageSize={heroSize}
       />
-       : <div className="hero-visual hero-image-placeholder" aria-label="Hero image">Upload a Hero image in Admin</div>}
-    </section>}
+    ) : (
+      <div
+        className="hero-visual hero-image-placeholder"
+        aria-label="Hero image"
+      >
+        Upload a Hero image in Admin
+      </div>
+    )}
+  </section>
+)}
 
     {enabled('stats') && <section className="stats">{config.stats.map(s => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}</section>}
     {enabled('steps') && <section id="steps" className="section"><Header eyebrow="The process" title="Three steps. Zero friction."/><div className="stepgrid">{config.steps.map(s => <article className="card" key={s.title}><b>{s.icon}</b><h3>{s.title}</h3><p>{s.body}</p></article>)}</div></section>}
