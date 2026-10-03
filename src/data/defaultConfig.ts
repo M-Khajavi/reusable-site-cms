@@ -82,6 +82,7 @@ export const defaultConfig: SiteConfig = {
     grey: '#E4E9ED',
     accent: '#FF5A36',
     dark: '#0F3A5A',
+    headerFooter: '#231F20',
   },
 
   /* Kept for backward compatibility. The public header now uses section menu settings. */
@@ -162,9 +163,9 @@ export const defaultConfig: SiteConfig = {
   },
 
   segments: [
-    { title: 'Startups', description: 'Launch quickly with a polished structure.', bullets: ['Clear positioning', 'Reusable content blocks', 'Simple administration'] },
-    { title: 'Consultancies', description: 'Present expertise and services professionally.', bullets: ['Case-study friendly', 'Insights and news', 'Flexible CTAs'] },
-    { title: 'Product brands', description: 'Turn product information into a strong digital story.', bullets: ['Feature sections', 'Visual storytelling', 'Scalable content'] },
+    { title: 'Startups', description: 'Launch quickly with a polished structure.', bullets: ['Clear positioning', 'Reusable content blocks', 'Simple administration'], icon: '🚀' },
+    { title: 'Consultancies', description: 'Present expertise and services professionally.', bullets: ['Case-study friendly', 'Insights and news', 'Flexible CTAs'], icon: '🧭' },
+    { title: 'Product brands', description: 'Turn product information into a strong digital story.', bullets: ['Feature sections', 'Visual storytelling', 'Scalable content'], icon: '📦' },
   ],
 
   blocks: [
@@ -175,6 +176,7 @@ export const defaultConfig: SiteConfig = {
     heading: 'Insights',
     subtitle: 'Research, analysis and useful guidance.',
     effect: 'rec_move_2x',
+    viewAllHref: '#articles',
     cardStyle: {
       backgroundColor: '#FFFFFF',
       fontColor: '#231F20',
@@ -196,6 +198,7 @@ export const defaultConfig: SiteConfig = {
     heading: 'News',
     subtitle: 'Updates and announcements.',
     effect: 'rec_move_left',
+    viewAllHref: '#news',
     cardStyle: {
       backgroundColor: '#234E69',
       fontColor: '#FFFFFF',
@@ -216,6 +219,7 @@ export const defaultConfig: SiteConfig = {
     heading: 'A network of experts.',
     subtitle: 'Add people, partners or team members without changing the component code.',
     effect: 'card effect',
+    pageHref: '#cta',
     cardStyle: {
       backgroundColor: '#FFFFFF',
       fontColor: '#231F20',
