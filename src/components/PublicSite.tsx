@@ -7,8 +7,8 @@ const EFFECTS: EffectType[] = ['card effect', 'rec_move_left', 'rec_move_2x', 'c
 
 export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: () => void }) {
   const enabled = (id: string) => config.sections.find(s => s.id === id)?.enabled
-  const heroSize = Math.min(70, Math.max(25, Number(config.hero.imageSize || 48)))
-
+  const heroSize = Math.min(100, Math.max(25, Number(config.hero.imageSize || 48)))
+  
   return <div className="site" style={{ '--primary': config.theme.primary, '--secondary': config.theme.secondary, '--ink': config.theme.ink, '--paper': config.theme.paper, '--grey': config.theme.grey, '--accent': config.theme.accent, '--dark': config.theme.dark, '--hero-image-size': `${heroSize}%` } as CSSProperties}>
     <nav className="nav"><a className="brand" href="#">{config.brand.name}</a><div className="navlinks">{config.nav.map(n => <a key={n.href} href={n.href}>{n.label}</a>)}<a className="navcta" href="#cta">Get started</a></div></nav>
 
