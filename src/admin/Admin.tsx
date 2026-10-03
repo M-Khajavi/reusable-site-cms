@@ -419,8 +419,8 @@ function SectionAppearanceEditor({
   return (
     <div className="appearance-card">
       <div className="appearance-card-heading">
-        <strong>Section appearance</strong>
-        <span>Background and font color</span>
+        <strong>{sectionType === 'footer' ? 'Footer + header appearance' : 'Section appearance'}</strong>
+        <span>{sectionType === 'footer' ? 'Footer background is synchronized with the header color.' : 'Background and font color'}</span>
       </div>
 
       <div className="color-grid">
@@ -434,6 +434,10 @@ function SectionAppearanceEditor({
               )
               if (current) {
                 current.appearance.backgroundColor = value
+                if (sectionType === 'footer') {
+                  current.appearance.backgroundColor = value
+                  draft.theme.headerFooter = value
+                }
               }
             })
           }
@@ -830,6 +834,7 @@ function ThemeEditor({
     ['grey', 'Grey'],
     ['accent', 'Accent'],
     ['dark', 'Dark'],
+    ['headerFooter', 'Header & footer'],
   ]
 
   return (
@@ -845,6 +850,14 @@ function ThemeEditor({
             onChange={value =>
               update(c => {
                 c.theme[key] = value
+                if (key === 'headerFooter') {
+                  const footer = c.sections.find(
+                    section => section.type === 'footer',
+                  )
+                  if (footer) {
+                    footer.appearance.backgroundColor = value
+                  }
+                }
               })
             }
             key={key}
@@ -1008,6 +1021,7 @@ function HeroCalibration({
 }) {
   const [selected, setSelected] = useState(0)
   const [showGrid, setShowGrid] = useState(true)
+  const [showGuides, setShowGuides] = useState(true)
   const brand = config.hero.calibration?.[selected]
 
   if (!brand) {
@@ -1047,6 +1061,15 @@ function HeroCalibration({
           Show grid
         </label>
 
+        <label className="inline-check">
+          <input
+            type="checkbox"
+            checked={showGuides}
+            onChange={event => setShowGuides(event.target.checked)}
+          />
+          Show guide lines
+        </label>
+
         <select
           value={selected}
           onChange={event => setSelected(Number(event.target.value))}
@@ -1063,6 +1086,25 @@ function HeroCalibration({
         <img src={config.hero.image} alt="Hero calibration preview" />
 
         {showGrid && <div className="hero-calibration-grid" />}
+
+        {showGuides && (
+          <div className="hero-calibration-guides" aria-hidden="true">
+            {[25, 50, 75].map(value => (
+              <span
+                key={`v-${value}`}
+                className={value === 50 ? 'guide guide-v guide-center' : 'guide guide-v'}
+                style={{ left: `${value}%` }}
+              />
+            ))}
+            {[25, 50, 75].map(value => (
+              <span
+                key={`h-${value}`}
+                className={value === 50 ? 'guide guide-h guide-center' : 'guide guide-h'}
+                style={{ top: `${value}%` }}
+              />
+            ))}
+          </div>
+        )}
 
         {config.hero.calibration.map((item, index) => (
           <div
@@ -1263,13 +1305,14 @@ function SegmentsEditor({
       <SectionAppearanceEditor config={config} update={update} sectionType="segments" />
       {config.segments.map((item, index) => (
         <div className="repeat-card" key={index}>
+          <Field label="Icon (emoji / text)" value={item.icon || ''} placeholder="e.g. 🚀" onChange={v => update(c => (c.segments[index].icon = v))} />
           <Field label="Title" value={item.title} onChange={v => update(c => (c.segments[index].title = v))} />
           <Field label="Description" value={item.description} onChange={v => update(c => (c.segments[index].description = v))} multiline />
           <Field label="Bullets (one per line)" value={item.bullets.join('\n')} onChange={v => update(c => (c.segments[index].bullets = v.split('\n').filter(Boolean)))} multiline />
           <DeleteButton onClick={() => update(c => c.segments.splice(index, 1))} />
         </div>
       ))}
-      <AddButton onClick={() => update(c => c.segments.push({ title: 'New audience', description: 'Describe this audience.', bullets: ['Benefit one', 'Benefit two'] }))}>Add audience</AddButton>
+      <AddButton onClick={() => update(c => c.segments.push({ title: 'New audience', description: 'Describe this audience.', bullets: ['Benefit one', 'Benefit two'], icon: '✦' }))}>Add audience</AddButton>
     </Panel>
   )
 }
@@ -1355,6 +1398,12 @@ function ArticleSectionEditor({
       <SectionAppearanceEditor config={config} update={update} sectionType={kind} />
       <Field label="Heading" value={section.heading} onChange={v => update(c => (c[kind].heading = v))} />
       <Field label="Subtitle" value={section.subtitle} onChange={v => update(c => (c[kind].subtitle = v))} multiline />
+      <Field
+        label="View all link target"
+        value={section.viewAllHref}
+        placeholder="/articles, #articles or https://..."
+        onChange={v => update(c => (c[kind].viewAllHref = v))}
+      />
       <EffectSelect value={effect} onChange={v => update(c => (c[kind].effect = v))} />
 
       <CardStyleEditor
@@ -1394,6 +1443,12 @@ function PeopleEditor({
       <SectionAppearanceEditor config={config} update={update} sectionType="people" />
       <Field label="Heading" value={config.people.heading} onChange={v => update(c => (c.people.heading = v))} />
       <Field label="Subtitle" value={config.people.subtitle} onChange={v => update(c => (c.people.subtitle = v))} multiline />
+      <Field
+        label="Network page target"
+        value={config.people.pageHref}
+        placeholder="/network, #cta or https://..."
+        onChange={v => update(c => (c.people.pageHref = v))}
+      />
       <EffectSelect value={effect} onChange={v => update(c => (c.people.effect = v))} />
       <CardStyleEditor
         title="Network card style"
