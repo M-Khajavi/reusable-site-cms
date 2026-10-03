@@ -13,7 +13,7 @@ type Tab = SectionType | 'site' | 'theme' | 'navigation'
 export function Admin({ config, onChange, onPublic }: Props) {
   const [active, setActive] = useState<Tab>('site')
   const fileInput = useRef<HTMLInputElement>(null)
-  const [imageTarget, setImageTarget] = useState<'hero' | number | null>(null)
+  const [imageTarget, setImageTarget] = useState<'hero' | 'logo' | number | null>(null)
 
   const update = (mutate: (draft: SiteConfig) => void) => {
     const draft = structuredClone(config)
@@ -50,7 +50,7 @@ export function Admin({ config, onChange, onPublic }: Props) {
     reader.readAsText(file)
   }
 
-  const pickImage = (target: 'hero' | number) => {
+  const pickImage = (target: 'hero' | 'logo' | number) => {
     setImageTarget(target)
     fileInput.current?.click()
   }
@@ -61,8 +61,13 @@ export function Admin({ config, onChange, onPublic }: Props) {
     reader.onload = () => {
       const value = String(reader.result)
       update(draft => {
-        if (imageTarget === 'hero') draft.hero.image = value
-        else if (draft.blocks[imageTarget]) draft.blocks[imageTarget].image = value
+        if (imageTarget === 'hero') {
+          draft.hero.image = value
+        } else if (imageTarget === 'logo') {
+          draft.brand.logo = value
+        } else if (draft.blocks[imageTarget]) {
+          draft.blocks[imageTarget].image = value
+        }
       })
       setImageTarget(null)
     }
@@ -133,7 +138,7 @@ export function Admin({ config, onChange, onPublic }: Props) {
         </aside>
 
         <main className="admin-main">
-          {active === 'site' && <SiteEditor config={config} update={update} />}
+          {active === 'site' && <SiteEditor config={config} update={update} pickImage={pickImage} />}
           {active === 'navigation' && <NavigationEditor config={config} update={update} />}
           {active === 'theme' && <ThemeEditor config={config} update={update} />}
           {active === 'hero' && <HeroEditor config={config} update={update} pickImage={pickImage} />}
@@ -171,13 +176,30 @@ function DeleteButton({ onClick }: { onClick: () => void }) {
   return <button className="delete-button" onClick={onClick}>Delete</button>
 }
 
-function SiteEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
-  return <Panel title="Brand & site identity" description="Control the main identity used throughout the website.">
-    <div className="admin-grid two">
-      <Field label="Brand name" value={config.brand.name} onChange={v => update(c => c.brand.name = v)} />
-      <Field label="Tagline" value={config.brand.tagline} onChange={v => update(c => c.brand.tagline = v)} />
-    </div>
-  </Panel>
+function SiteEditor({ config, update, pickImage }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void; pickImage: (target: 'hero' | 'logo' | number) => void }) {
+  return (
+    <Panel title="Brand & site identity" description="Control the main identity used throughout the website.">
+      <div className="admin-grid two">
+        <Field
+          label="Brand name"
+          value={config.brand.name}
+          onChange={v => update(c => c.brand.name = v)}
+        />
+        <Field
+          label="Tagline"
+          value={config.brand.tagline}
+          onChange={v => update(c => c.brand.tagline = v)}
+        />
+      </div>
+
+      <ImageEditor
+        label="Brand logo"
+        value={config.brand.logo}
+        onChange={v => update(c => c.brand.logo = v)}
+        onUpload={() => pickImage('logo')}
+      />
+    </Panel>
+  )
 }
 
 function NavigationEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
@@ -272,6 +294,47 @@ function HeroEditor({ config, update, pickImage }: { config: SiteConfig; update:
           100% makes the Hero image cover the full Hero width.
         </small>
       </label>
+
+      <div className="admin-grid two">
+        <label className="admin-field">
+          <span>Hero title size (px)</span>
+
+          <input
+            type="range"
+            min="48"
+            max="120"
+            step="1"
+            value={config.hero.titleSize ?? 100}
+            onChange={e =>
+              update(c => {
+                c.hero.titleSize = Number(e.target.value)
+              })
+            }
+          />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <small>48px</small>
+            <strong>{config.hero.titleSize ?? 100}px</strong>
+            <small>120px</small>
+          </div>
+        </label>
+
+        <label className="admin-field">
+          <span>Hero text color</span>
+
+          <input
+            type="color"
+            value={config.hero.textColor ?? '#FFFFFF'}
+            onChange={e =>
+              update(c => {
+                c.hero.textColor = e.target.value
+              })
+            }
+          />
+
+          <code>{config.hero.textColor ?? '#FFFFFF'}</code>
+        </label>
+      </div>
 
       <HeroCalibration config={config} update={update} />
     </Panel>
