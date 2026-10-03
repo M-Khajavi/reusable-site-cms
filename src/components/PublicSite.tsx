@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react'
 import type { SiteConfig, EffectType } from '../types/site'
+import { HeroShelfAudit } from './HeroShelfAudit'
+import './HeroShelfAudit.css'
 
 const EFFECTS: EffectType[] = ['card effect', 'rec_move_left', 'rec_move_2x', 'circle_move_left']
 
@@ -12,7 +14,7 @@ export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: (
 
     {enabled('hero') && <section className="hero">
       <div className="hero-copy"><span className="eyebrow">{config.hero.eyebrow}</span><h1>{config.hero.title}</h1><p>{config.hero.subtitle}</p><div className="buttons"><a className="primary" href="#cta">{config.hero.primaryCta}</a><a className="outline" href="#steps">{config.hero.secondaryCta}</a></div></div>
-      <div className="hero-visual" aria-label="Hero image">{config.hero.image ? <img src={config.hero.image} alt="" /> : <div className="hero-image-placeholder">HERO IMAGE / MEDIA</div>}</div>
+      {config.hero.image ? <HeroShelfAudit image={config.hero.image} /> : <div className="hero-visual hero-image-placeholder" aria-label="Hero image">Upload a Hero image in Admin</div>}
     </section>}
 
     {enabled('stats') && <section className="stats">{config.stats.map(s => <div key={s.label}><strong>{s.value}</strong><span>{s.label}</span></div>)}</section>}
