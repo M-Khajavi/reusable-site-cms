@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { SiteConfig, SectionType } from '../types/site'
+import type { SiteConfig, SectionType, EffectType } from '../types/site'
 
 type Props = {
   config: SiteConfig
@@ -210,6 +210,7 @@ function HeroEditor({ config, update, pickImage }: { config: SiteConfig; update:
       <Field label="Secondary button" value={config.hero.secondaryCta} onChange={v => update(c => c.hero.secondaryCta = v)} />
     </div>
     <ImageEditor label="Hero image" value={config.hero.image} onChange={v => update(c => c.hero.image = v)} onUpload={() => pickImage('hero')} />
+    <label className="admin-field"><span>Hero image size (%)</span><input type="number" min={25} max={70} value={config.hero.imageSize ?? 48} onChange={e => update(c => c.hero.imageSize = Math.min(70, Math.max(25, Number(e.target.value) || 48)))} /><small className="field-help">Controls the visual column width on desktop.</small></label>
   </Panel>
 }
 
@@ -241,17 +242,45 @@ function BlocksEditor({ config, update, pickImage }: { config: SiteConfig; updat
   return <Panel title="Content blocks" description="Create flexible text + image sections.">{config.blocks.map((item, i) => <div className="repeat-card" key={i}><Field label="Eyebrow" value={item.eyebrow} onChange={v => update(c => c.blocks[i].eyebrow = v)} /><Field label="Title" value={item.title} onChange={v => update(c => c.blocks[i].title = v)} /><Field label="Body" value={item.body} onChange={v => update(c => c.blocks[i].body = v)} multiline /><div className="admin-grid two"><label className="admin-field"><span>Layout</span><select value={item.layout} onChange={e => update(c => c.blocks[i].layout = e.target.value as 'left' | 'right' | 'none')}><option value="left">Image left</option><option value="right">Image right</option><option value="none">Text only</option></select></label><label className="admin-field"><span>Background</span><select value={item.background} onChange={e => update(c => c.blocks[i].background = e.target.value as 'white' | 'paper' | 'dark')}><option value="white">White</option><option value="paper">Paper</option><option value="dark">Dark</option></select></label></div><ImageEditor label={`Block ${i + 1} image`} value={item.image} onChange={v => update(c => c.blocks[i].image = v)} onUpload={() => pickImage(i)} /><DeleteButton onClick={() => update(c => c.blocks.splice(i, 1))} /></div>)}<AddButton onClick={() => update(c => c.blocks.push({ eyebrow: 'New section', title: 'New content block', body: 'Add your content here.', image: '', layout: 'right', background: 'white' }))}>Add content block</AddButton></Panel>
 }
 
+function EffectSelect({ value, onChange }: { value: EffectType; onChange: (value: EffectType) => void }) {
+  return <label className="admin-field"><span>Effect</span><select value={value} onChange={e => onChange(e.target.value as EffectType)}>
+    <option value="card effect">card effect</option><option value="rec_move_left">rec_move_left</option><option value="rec_move_2x">rec_move_2x</option><option value="circle_move_left">circle_move_left</option>
+  </select></label>
+}
+
 function ArticleSectionEditor({ config, update, kind }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void; kind: 'articles' | 'news' }) {
   const section = config[kind]
-  return <Panel title={kind === 'articles' ? 'Insights' : 'News'} description="Edit the section heading and every article card."><Field label="Heading" value={section.heading} onChange={v => update(c => c[kind].heading = v)} /><Field label="Subtitle" value={section.subtitle} onChange={v => update(c => c[kind].subtitle = v)} multiline />{section.items.map((item, i) => <div className="repeat-card" key={i}><Field label="Title" value={item.title} onChange={v => update(c => c[kind].items[i].title = v)} /><div className="admin-grid two"><Field label="Category" value={item.category} onChange={v => update(c => c[kind].items[i].category = v)} /><Field label="Date" value={item.date} onChange={v => update(c => c[kind].items[i].date = v)} /></div><Field label="Excerpt" value={item.excerpt} onChange={v => update(c => c[kind].items[i].excerpt = v)} multiline /><DeleteButton onClick={() => update(c => c[kind].items.splice(i, 1))} /></div>)}<AddButton onClick={() => update(c => c[kind].items.push({ title: 'New article', category: 'Update', excerpt: 'Add a short description.', date: 'Oct 2026' }))}>Add item</AddButton></Panel>
+  const effect = section.effect || (kind === 'articles' ? 'rec_move_2x' : 'rec_move_left')
+  return <Panel title={kind === 'articles' ? 'Insights' : 'News'} description="Edit the section heading, effect and every article card.">
+    <Field label="Heading" value={section.heading} onChange={v => update(c => c[kind].heading = v)} />
+    <Field label="Subtitle" value={section.subtitle} onChange={v => update(c => c[kind].subtitle = v)} multiline />
+    <EffectSelect value={effect} onChange={v => update(c => c[kind].effect = v)} />
+    {section.items.map((item, i) => <div className="repeat-card" key={i}><Field label="Title" value={item.title} onChange={v => update(c => c[kind].items[i].title = v)} /><div className="admin-grid two"><Field label="Category" value={item.category} onChange={v => update(c => c[kind].items[i].category = v)} /><Field label="Date" value={item.date} onChange={v => update(c => c[kind].items[i].date = v)} /></div><Field label="Excerpt" value={item.excerpt} onChange={v => update(c => c[kind].items[i].excerpt = v)} multiline /><DeleteButton onClick={() => update(c => c[kind].items.splice(i, 1))} /></div>)}
+    <AddButton onClick={() => update(c => c[kind].items.push({ title: 'New article', category: 'Update', excerpt: 'Add a short description.', date: 'Oct 2026' }))}>Add item</AddButton>
+  </Panel>
 }
 
 function PeopleEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
-  return <Panel title="Network" description="Control the Network heading and every person, partner or expert card."><Field label="Heading" value={config.people.heading} onChange={v => update(c => c.people.heading = v)} /><Field label="Subtitle" value={config.people.subtitle} onChange={v => update(c => c.people.subtitle = v)} multiline />{config.people.items.map((item, i) => <div className="repeat-card" key={i}><div className="admin-grid two"><Field label="Name" value={item.name} onChange={v => update(c => c.people.items[i].name = v)} /><Field label="Role" value={item.role} onChange={v => update(c => c.people.items[i].role = v)} /></div><Field label="Region" value={item.region} onChange={v => update(c => c.people.items[i].region = v)} /><Field label="Bio" value={item.bio} onChange={v => update(c => c.people.items[i].bio = v)} multiline /><DeleteButton onClick={() => update(c => c.people.items.splice(i, 1))} /></div>)}<AddButton onClick={() => update(c => c.people.items.push({ name: 'New partner', role: 'Partner', region: 'Region', bio: 'Short biography.' }))}>Add network member</AddButton></Panel>
+  const effect = config.people.effect || 'card effect'
+  return <Panel title="Network" description="Control the Network heading, effect and every person, partner or expert card.">
+    <Field label="Heading" value={config.people.heading} onChange={v => update(c => c.people.heading = v)} />
+    <Field label="Subtitle" value={config.people.subtitle} onChange={v => update(c => c.people.subtitle = v)} multiline />
+    <EffectSelect value={effect} onChange={v => update(c => c.people.effect = v)} />
+    {config.people.items.map((item, i) => <div className="repeat-card" key={i}><div className="admin-grid two"><Field label="Name" value={item.name} onChange={v => update(c => c.people.items[i].name = v)} /><Field label="Role" value={item.role} onChange={v => update(c => c.people.items[i].role = v)} /></div><Field label="Region" value={item.region} onChange={v => update(c => c.people.items[i].region = v)} /><Field label="Bio" value={item.bio} onChange={v => update(c => c.people.items[i].bio = v)} multiline /><DeleteButton onClick={() => update(c => c.people.items.splice(i, 1))} /></div>)}
+    <AddButton onClick={() => update(c => c.people.items.push({ name: 'New partner', role: 'Partner', region: 'Region', bio: 'Short biography.' }))}>Add network member</AddButton>
+  </Panel>
 }
 
 function PhilosophyEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
-  return <Panel title="Philosophy" description="Edit the principle section."><Field label="Title" value={config.philosophy.title} onChange={v => update(c => c.philosophy.title = v)} /><Field label="Body" value={config.philosophy.body} onChange={v => update(c => c.philosophy.body = v)} multiline /></Panel>
+  const lines = config.philosophy.lines || []
+  return <Panel title="The Shelvion Principle" description="Edit the principle heading, statement lines and supporting text.">
+    <Field label="Eyebrow" value={config.philosophy.eyebrow || 'the shelvion principle'} onChange={v => update(c => c.philosophy.eyebrow = v)} />
+    <Field label="Title" value={config.philosophy.title} onChange={v => update(c => c.philosophy.title = v)} />
+    <h3 className="subheading">Principle lines</h3>
+    {lines.map((line, i) => <div className="repeat-card" key={i}><Field label={`Line ${i + 1}`} value={line.text} onChange={v => update(c => c.philosophy.lines[i].text = v)} /><label className="admin-field inline-check"><input type="checkbox" checked={line.highlighted} onChange={e => update(c => c.philosophy.lines[i].highlighted = e.target.checked)} /><span>Highlight this line</span></label><DeleteButton onClick={() => update(c => c.philosophy.lines.splice(i, 1))} /></div>)}
+    <AddButton onClick={() => update(c => c.philosophy.lines.push({ text: 'New principle line', highlighted: false }))}>Add principle line</AddButton>
+    <Field label="Body" value={config.philosophy.body} onChange={v => update(c => c.philosophy.body = v)} multiline />
+  </Panel>
 }
 
 function CtaEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
