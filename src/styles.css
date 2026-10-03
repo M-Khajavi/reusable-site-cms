@@ -124,3 +124,10 @@
   }
 }
 
+.hero {
+  background: transparent !important;
+}
+
+.hero-copy {
+  background: transparent !important;
+}
