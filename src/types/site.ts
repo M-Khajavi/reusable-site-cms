@@ -30,7 +30,7 @@ export interface HeroBrandCalibration {
   products: HeroProductCalibration[]
 }
 export interface SiteConfig {
-  brand:{name:string; tagline:string};
+  brand:{name:string; tagline:string; logo:string};
   theme:{primary:string; secondary:string; ink:string; paper:string; grey:string; accent:string; dark:string};
   nav:{label:string; href:string}[];
   sections:Section[];
@@ -42,6 +42,8 @@ export interface SiteConfig {
     secondaryCta:string
     image:string
     imageSize:number
+    titleSize:number
+    textColor:string
     calibration:HeroBrandCalibration[]
   };
   stats:Stat[]; steps:Step[]; findings:Finding[]; report:{title:string; store:string; category:string; metrics:{label:string;value:string}[]};
