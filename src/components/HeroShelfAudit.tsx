@@ -181,7 +181,11 @@ export function HeroShelfAudit({ image }: { image: string }) {
 
         <div className={`hero-audit-brand-card ${stage === 'brand' ? 'show' : ''}`}>
           <div className="hero-audit-card-label">Detected brand</div>
-          <div className="hero-audit-card-value">{brandText || `Brand: ${brand.name}`}</div>
+          <div className="hero-audit-card-value">
+            {(brandText || `Brand: ${brand.name}`).split('\n').map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
+          </div>
         </div>
 
         {product && stage === 'brand' && (
