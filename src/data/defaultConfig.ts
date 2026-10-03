@@ -1,5 +1,5 @@
-import type {SiteConfig} from '../types/site';
-import type {SiteConfig, HeroBrandCalibration} from '../types/site';
+import type { SiteConfig, HeroBrandCalibration } from '../types/site'
+
 const heroCalibration: HeroBrandCalibration[] = [
   {
     name: 'Paulig',
