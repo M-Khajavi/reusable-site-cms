@@ -32,112 +32,131 @@
 .effect-card-row{display:flex;align-items:stretch;width:max-content;gap:0;padding:8px 5vw 55px;overflow:visible}.effect-card{position:relative;flex:0 0 296px;min-height:230px;margin-right:-38px;padding:22px;background:#fff;border:1.5px solid #E4E9ED;border-radius:8px;box-shadow:0 18px 42px rgba(35,31,32,.12);display:flex;flex-direction:column;transform:rotate(calc((var(--card-index,0) - 1)*2deg)) translateY(calc((var(--card-index,0) - 1)*10px));transition:transform .35s ease,box-shadow .35s ease;z-index:2}.effect-card:nth-child(even){transform:rotate(2deg) translateY(12px);z-index:3}.effect-card:nth-child(3n){transform:rotate(-1deg) translateY(6px);z-index:4}.effect-card:hover{transform:rotate(0deg) translateY(-20px) scale(1.03);box-shadow:0 30px 70px rgba(35,31,32,.2);z-index:100}.effect-card small{font:10px 'IBM Plex Mono',monospace;color:#2575A7;letter-spacing:.04em}.effect-card h3{font-family:Archivo,sans-serif;font-size:17px;line-height:1.35;margin:12px 0 8px}.effect-card p{font-size:13px;color:rgba(35,31,32,.58);line-height:1.55;margin:0 0 14px}.effect-card span{font:10px 'IBM Plex Mono',monospace;color:#999;margin-top:auto}.effect-card-row-dark .effect-card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:#fff}.effect-card-row-dark .effect-card h3{color:#fff}.effect-card-row-dark .effect-card p{color:rgba(255,255,255,.45)}.effect-card-row-dark .effect-card span{color:#4ECACE}.effect-card-row-dark .effect-card small{display:inline-block;background:rgba(78,202,206,.18);color:#4ECACE;padding:3px 7px;border-radius:3px;width:max-content}.article-circle-mask{margin-top:4px}.article-circle-mask .network-circle{padding:0 22px}.article-circle-badge{font:10px 'IBM Plex Mono',monospace;color:#2575A7;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.effect-circle-dark .network-circle{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:#fff}.effect-circle-dark .network-name{color:#fff}.effect-circle-dark .network-region{color:rgba(255,255,255,.38)}.effect-circle-dark .article-circle-badge{color:#4ECACE}
 
 /* =========================================================
-   FULL-WIDTH HERO IMAGE
-   Image covers the entire Hero area.
-   Text stays above the image.
+   HERO IMAGE + TEXT OVERLAY
+   The Hero uses a navy background.
+   The image width is controlled by --hero-image-size
+   and its height follows the 16:9 aspect ratio.
    ========================================================= */
 
-@media (min-width: 801px) {
-  .hero {
-    position: relative;
-    display: block;
-    width: 100%;
-    min-height: 92vh;
-    padding: 150px 8vw 80px;
-    overflow: hidden;
-  }
+.hero {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 92vh;
+  padding: 150px 8vw 80px;
+  overflow: hidden;
+  background: #0F3A5A !important;
+  color: #fff;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 20;
+  max-width: 760px;
+  background: transparent !important;
+}
 
 .hero-audit-wrap {
   position: absolute;
-  top: 0;
+  top: 50%;
   right: 0;
-  bottom: 0;
-  z-index: 1;
+  left: auto;
+  bottom: auto;
   width: var(--hero-image-size, 48%);
+  height: auto;
+  aspect-ratio: 16 / 9;
   max-width: none !important;
-  height: 100%;
   margin: 0;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
-  .hero-audit-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .hero-audit-img,
-  .hero-audit-spotlight img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .hero-copy {
-    position: relative;
-    z-index: 20;
-    max-width: 760px;
-  }
+.hero-audit-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
+
+.hero-audit-img,
+.hero-audit-spotlight img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+/* Soft navy-to-transparent layer for text readability.
+   This is an overlay, not a solid text background. */
+.hero-audit-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 58, 90, 0.78) 0%,
+    rgba(15, 58, 90, 0.42) 32%,
+    rgba(15, 58, 90, 0.08) 62%,
+    transparent 100%
+  );
+}
+
+/* =========================================================
+   MOBILE HERO
+   ========================================================= */
 
 @media (max-width: 800px) {
   .hero {
-    position: relative;
     display: block;
     width: 100%;
     min-height: 90vh;
     padding: 120px 6vw 60px;
     overflow: hidden;
-  }
-
-.hero-audit-wrap {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  width: var(--hero-image-size, 48%);
-  max-width: none !important;
-  height: 100%;
-  margin: 0;
-}
-
-  .hero-audit-frame {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .hero-audit-img,
-  .hero-audit-spotlight img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    background: #0F3A5A !important;
   }
 
   .hero-copy {
     position: relative;
     z-index: 20;
     max-width: 100%;
+    background: transparent !important;
   }
-   
+
+  .hero-audit-wrap {
+    top: 50%;
+    right: 0;
+    left: auto;
+    bottom: auto;
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-width: none !important;
+    transform: translateY(-50%);
+  }
+
+  .hero-audit-frame {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+
+  .hero-audit-img,
+  .hero-audit-spotlight img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
 }
 
-.hero {
-  background: transparent !important;
-}
-
-.hero-copy {
-  background: transparent !important;
-}
-
+/* =========================================================
+   HERO CALIBRATION MODE
+   ========================================================= */
 
 .hero-calibration {
   margin-top: 28px;
@@ -237,26 +256,5 @@
 @media (max-width: 700px) {
   .hero-calibration-values {
     grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-
-.hero-audit-wrap {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: auto;
-  max-width: none !important;
-  height: 100%;
-  margin: 0;
-  z-index: 1;
-}
-
-@media (max-width: 800px) {
-  .hero-audit-wrap {
-    width: 100% !important;
-    left: 0;
-    right: 0;
   }
 }
