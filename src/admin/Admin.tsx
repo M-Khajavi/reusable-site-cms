@@ -1,243 +1,55 @@
-import { useRef, useState } from 'react'
-import type { ReactNode } from 'react'
-import type { SiteConfig, SectionType, EffectType } from '../types/site'
+            onClick={() => setSelected(i)}
+          >
+            <span>{b.name}</span>
+          </div>
+        ))}
+      </div>
 
-type Props = {
-  config: SiteConfig
-  onChange: (config: SiteConfig) => void
-  onPublic: () => void
-}
+      <div className="hero-calibration-values">
+        <label>
+          X
+          <input
+            type="number"
+            step="0.1"
+            value={brand.area.x}
+            onChange={e => updateArea('x', Number(e.target.value))}
+          />
+        </label>
 
-type Tab = SectionType | 'site' | 'theme' | 'navigation'
+        <label>
+          Y
+          <input
+            type="number"
+            step="0.1"
+            value={brand.area.y}
+            onChange={e => updateArea('y', Number(e.target.value))}
+          />
+        </label>
 
-export function Admin({ config, onChange, onPublic }: Props) {
-  const [active, setActive] = useState<Tab>('site')
-  const fileInput = useRef<HTMLInputElement>(null)
-  const [imageTarget, setImageTarget] = useState<'hero' | number | null>(null)
+        <label>
+          Width
+          <input
+            type="number"
+            step="0.1"
+            value={brand.area.w}
+            onChange={e => updateArea('w', Number(e.target.value))}
+          />
+        </label>
 
-  const update = (mutate: (draft: SiteConfig) => void) => {
-    const draft = structuredClone(config)
-    mutate(draft)
-    onChange(draft)
-  }
-
-  const reset = () => {
-    localStorage.removeItem('reusable-site-cms-config')
-    location.reload()
-  }
-
-  const exportConfig = () => {
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'site-config.json'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const importConfig = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result)) as SiteConfig
-        onChange(parsed)
-        alert('Configuration imported.')
-      } catch {
-        alert('Invalid configuration JSON.')
-      }
-    }
-    reader.readAsText(file)
-  }
-
-  const pickImage = (target: 'hero' | number) => {
-    setImageTarget(target)
-    fileInput.current?.click()
-  }
-
-  const onImageSelected = (file?: File) => {
-    if (!file || imageTarget === null) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      const value = String(reader.result)
-      update(draft => {
-        if (imageTarget === 'hero') draft.hero.image = value
-        else if (draft.blocks[imageTarget]) draft.blocks[imageTarget].image = value
-      })
-      setImageTarget(null)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const moveSection = (index: number, direction: -1 | 1) => {
-    update(draft => {
-      const next = index + direction
-      if (next < 0 || next >= draft.sections.length) return
-      const [item] = draft.sections.splice(index, 1)
-      draft.sections.splice(next, 0, item)
-    })
-  }
-
-  return (
-    <div className="admin-shell">
-      <input
-        ref={fileInput}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={e => onImageSelected(e.target.files?.[0])}
-      />
-
-      <header className="admin-topbar">
-        <div>
-          <strong>{config.brand.name}</strong>
-          <span> / Content Control Panel</span>
-        </div>
-        <div className="admin-actions">
-          <button onClick={onPublic}>Preview site</button>
-          <button onClick={exportConfig}>Export JSON</button>
-          <label className="admin-button">
-            Import JSON
-            <input type="file" accept="application/json" hidden onChange={e => e.target.files?.[0] && importConfig(e.target.files[0])} />
-          </label>
-          <button className="primary" onClick={() => { localStorage.setItem('reusable-site-cms-config', JSON.stringify(config)); alert('Saved locally.') }}>Save</button>
-          <button onClick={reset}>Reset</button>
-        </div>
-      </header>
-
-      <div className="admin-body">
-        <aside className="admin-sidebar">
-          <div className="admin-sidebar-title">Site</div>
-          <button className={active === 'site' ? 'selected' : ''} onClick={() => setActive('site')}>Brand</button>
-          <button className={active === 'navigation' ? 'selected' : ''} onClick={() => setActive('navigation')}>Navigation</button>
-          <button className={active === 'theme' ? 'selected' : ''} onClick={() => setActive('theme')}>Theme</button>
-
-          <div className="admin-sidebar-title">Sections</div>
-          {config.sections.map((section, index) => (
-            <div className={`section-nav ${active === section.id ? 'selected' : ''}`} key={section.id}>
-              <button className="section-nav-main" onClick={() => setActive(section.type)}>
-                <span>{section.label}</span>
-                <small>{section.enabled ? 'ON' : 'OFF'}</small>
-              </button>
-              <div className="section-nav-tools">
-                <button title="Move up" disabled={index === 0} onClick={() => moveSection(index, -1)}>↑</button>
-                <button title="Move down" disabled={index === config.sections.length - 1} onClick={() => moveSection(index, 1)}>↓</button>
-                <input
-                  type="checkbox"
-                  checked={section.enabled}
-                  onChange={e => update(draft => { const s = draft.sections.find(x => x.id === section.id); if (s) s.enabled = e.target.checked })}
-                />
-              </div>
-            </div>
-          ))}
-        </aside>
-
-        <main className="admin-main">
-          {active === 'site' && <SiteEditor config={config} update={update} />}
-          {active === 'navigation' && <NavigationEditor config={config} update={update} />}
-          {active === 'theme' && <ThemeEditor config={config} update={update} />}
-          {active === 'hero' && <HeroEditor config={config} update={update} pickImage={pickImage} />}
-          {active === 'stats' && <StatsEditor config={config} update={update} />}
-          {active === 'steps' && <StepsEditor config={config} update={update} />}
-          {active === 'ticker' && <TickerEditor config={config} update={update} />}
-          {active === 'report' && <ReportEditor config={config} update={update} />}
-          {active === 'segments' && <SegmentsEditor config={config} update={update} />}
-          {active === 'blocks' && <BlocksEditor config={config} update={update} pickImage={pickImage} />}
-          {active === 'articles' && <ArticleSectionEditor config={config} update={update} kind="articles" />}
-          {active === 'news' && <ArticleSectionEditor config={config} update={update} kind="news" />}
-          {active === 'people' && <PeopleEditor config={config} update={update} />}
-          {active === 'philosophy' && <PhilosophyEditor config={config} update={update} />}
-          {active === 'cta' && <CtaEditor config={config} update={update} />}
-          {active === 'footer' && <FooterEditor config={config} update={update} />}
-        </main>
+        <label>
+          Height
+          <input
+            type="number"
+            step="0.1"
+            value={brand.area.h}
+            onChange={e => updateArea('h', Number(e.target.value))}
+          />
+        </label>
       </div>
     </div>
   )
 }
 
-function Panel({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
-  return <section className="admin-panel"><div className="admin-panel-heading"><h1>{title}</h1>{description && <p>{description}</p>}</div>{children}</section>
-}
-
-function Field({ label, value, onChange, multiline = false, placeholder }: { label: string; value: string; onChange: (value: string) => void; multiline?: boolean; placeholder?: string }) {
-  return <label className="admin-field"><span>{label}</span>{multiline ? <textarea value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} /> : <input value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />}</label>
-}
-
-function AddButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-  return <button className="add-button" onClick={onClick}>+ {children}</button>
-}
-
-function DeleteButton({ onClick }: { onClick: () => void }) {
-  return <button className="delete-button" onClick={onClick}>Delete</button>
-}
-
-function SiteEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
-  return <Panel title="Brand & site identity" description="Control the main identity used throughout the website.">
-    <div className="admin-grid two">
-      <Field label="Brand name" value={config.brand.name} onChange={v => update(c => c.brand.name = v)} />
-      <Field label="Tagline" value={config.brand.tagline} onChange={v => update(c => c.brand.tagline = v)} />
-    </div>
-  </Panel>
-}
-
-function NavigationEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
-  return <Panel title="Navigation" description="Edit menu labels and links.">
-    {config.nav.map((item, i) => <div className="repeat-card" key={i}>
-      <div className="admin-grid two">
-        <Field label="Label" value={item.label} onChange={v => update(c => c.nav[i].label = v)} />
-        <Field label="Link" value={item.href} onChange={v => update(c => c.nav[i].href = v)} />
-      </div>
-      <DeleteButton onClick={() => update(c => c.nav.splice(i, 1))} />
-    </div>)}
-    <AddButton onClick={() => update(c => c.nav.push({ label: 'New item', href: '#' }))}>Add navigation item</AddButton>
-  </Panel>
-}
-
-function ThemeEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
-  const colors: Array<[keyof SiteConfig['theme'], string]> = [['primary', 'Primary'], ['secondary', 'Secondary'], ['ink', 'Text'], ['paper', 'Paper'], ['grey', 'Grey'], ['accent', 'Accent'], ['dark', 'Dark']]
-  return <Panel title="Theme" description="Change the visual color system without editing CSS.">
-    <div className="color-grid">{colors.map(([key, label]) => <label className="color-field" key={key}><span>{label}</span><input type="color" value={config.theme[key]} onChange={e => update(c => c.theme[key] = e.target.value)} /><code>{config.theme[key]}</code></label>)}</div>
-  </Panel>
-}
-
-function HeroEditor({ config, update, pickImage }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void; pickImage: (target: 'hero' | number) => void }) {
-  return <Panel title="Hero" description="Control the first screen visitors see, including the main image.">
-    <Field label="Eyebrow" value={config.hero.eyebrow} onChange={v => update(c => c.hero.eyebrow = v)} />
-    <Field label="Title" value={config.hero.title} onChange={v => update(c => c.hero.title = v)} multiline />
-    <Field label="Subtitle" value={config.hero.subtitle} onChange={v => update(c => c.hero.subtitle = v)} multiline />
-    <div className="admin-grid two">
-      <Field label="Primary button" value={config.hero.primaryCta} onChange={v => update(c => c.hero.primaryCta = v)} />
-      <Field label="Secondary button" value={config.hero.secondaryCta} onChange={v => update(c => c.hero.secondaryCta = v)} />
-    </div>
-    <ImageEditor label="Hero image" value={config.hero.image} onChange={v => update(c => c.hero.image = v)} onUpload={() => pickImage('hero')} />
-     <label className="admin-field">
-      <span>Hero image width (%)</span>
-    
-      <input
-        type="range"
-        min="25"
-        max="100"
-        step="1"
-        value={config.hero.imageSize ?? 48}
-        onChange={e =>
-          update(c => {
-            c.hero.imageSize = Number(e.target.value)
-          })
-        }
-      />
-    
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <small>25%</small>
-        <strong>{config.hero.imageSize ?? 48}%</strong>
-        <small>100%</small>
-      </div>
-    
-      <small className="field-help">
-        100% makes the Hero image cover the full Hero width.
-      </small>
-    </label>
-  </Panel>
-}
 
 function ImageEditor({ label, value, onChange, onUpload }: { label: string; value: string; onChange: (v: string) => void; onUpload: () => void }) {
   return <div className="image-editor"><div className="image-editor-head"><span>{label}</span><button onClick={onUpload}>Upload image</button></div><Field label="Image URL" value={value} onChange={onChange} placeholder="https://... or uploaded image" />{value && <img className="admin-image-preview" src={value} alt="Preview" />}</div>
@@ -314,4 +126,3 @@ function CtaEditor({ config, update }: { config: SiteConfig; update: (f: (c: Sit
 
 function FooterEditor({ config, update }: { config: SiteConfig; update: (f: (c: SiteConfig) => void) => void }) {
   return <Panel title="Footer" description="Edit footer text."><Field label="Footer text" value={config.footer} onChange={v => update(c => c.footer = v)} multiline /></Panel>
-}
