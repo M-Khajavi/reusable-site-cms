@@ -81,17 +81,26 @@ export function HeroShelfAudit({ image }: { image: string }) {
   useEffect(() => {
     let cancelled = false
 
-    const typeLines = async (lines: string[], setter: (value: string) => void, speed: number) => {
-      let out = ''
-      for (const line of lines) {
-        for (let i = 1; i <= line.length; i += 1) {
-          if (cancelled) return
-          out = `${out ? `${out}\n` : ''}${line.slice(0, i)}`
-          setter(out)
-          await sleep(speed)
-        }
+  const typeLines = async (
+    lines: string[],
+    setter: (value: string) => void,
+    speed: number
+  ) => {
+    let completed = ''
+  
+    for (const line of lines) {
+      for (let i = 1; i <= line.length; i += 1) {
+        if (cancelled) return
+  
+        setter(`${completed}${line.slice(0, i)}`)
+        await sleep(speed)
       }
+  
+      completed += `${line}\n`
     }
+  
+    setter(completed.trimEnd())
+  }
 
     const run = async () => {
       setStage('scanning')
