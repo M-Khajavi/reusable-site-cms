@@ -1,11 +1,64 @@
 import type {SiteConfig} from '../types/site';
+import type {SiteConfig, HeroBrandCalibration} from '../types/site';
+const heroCalibration: HeroBrandCalibration[] = [
+  {
+    name: 'Paulig',
+    facing: 4,
+    color: '#4ECACE',
+    area: { x: 12.7, y: 31, w: 31, h: 22 },
+    products: [
+      { variant: 'Classic', x: 13.2, y: 32.5, w: 7.2, h: 18.5 },
+      { variant: 'Presidentti Original', x: 20.6, y: 32.5, w: 7.4, h: 18.5 },
+      { variant: 'Dark', x: 28.2, y: 32.5, w: 7.1, h: 18.5 },
+      { variant: 'Café Parisien', x: 35.3, y: 32.5, w: 7.7, h: 18.5 },
+    ],
+  },
+
+  {
+    name: 'Twinings',
+    facing: 7,
+    color: '#F2C94C',
+    area: { x: 23.5, y: 8, w: 40, h: 19 },
+    products: [
+      { variant: 'English Breakfast', x: 23.8, y: 8.5, w: 5.4, h: 18 },
+      { variant: 'Earl Grey', x: 29.6, y: 8.5, w: 5.4, h: 18 },
+      { variant: 'Green Tea', x: 35.4, y: 8.5, w: 5.4, h: 18 },
+      { variant: 'Lemon & Ginger', x: 41.3, y: 8.5, w: 5.4, h: 18 },
+      { variant: 'Lemon & Peppermint', x: 47, y: 8.5, w: 5.4, h: 18 },
+      { variant: 'Pure Peppermint', x: 52.8, y: 8.5, w: 5.4, h: 18 },
+      { variant: 'Camomile', x: 58.5, y: 8.5, w: 5.2, h: 18 },
+    ],
+  },
+
+  {
+    name: 'Nescafé Dolce Gusto',
+    facing: 4,
+    color: '#FF5A36',
+    area: { x: 50, y: 58, w: 35, h: 17 },
+    products: [
+      { variant: 'Espresso Intenso', x: 50.4, y: 58.5, w: 8, h: 16 },
+      { variant: 'Café Au Lait', x: 58.8, y: 58.5, w: 8.4, h: 16 },
+      { variant: 'Cappuccino', x: 67.5, y: 58.5, w: 8.2, h: 16 },
+      { variant: 'Latte Macchiato', x: 76, y: 58.5, w: 8.5, h: 16 },
+    ],
+  },
+]
 export const defaultConfig:SiteConfig={
  brand:{name:'Northstar',tagline:'A reusable modern website template'},
  theme:{primary:'#2575A7',secondary:'#4ECACE',ink:'#231F20',paper:'#F7F9FA',grey:'#E4E9ED',accent:'#FF5A36',dark:'#0F3A5A'},
  nav:[{label:'How it works',href:'#steps'},{label:'Insights',href:'#articles'},{label:'News',href:'#news'},{label:'Network',href:'#people'}],
  sections:[
   {id:'hero',type:'hero',label:'Hero',enabled:true},{id:'stats',type:'stats',label:'Stats Strip',enabled:true},{id:'steps',type:'steps',label:'How It Works',enabled:true},{id:'ticker',type:'ticker',label:'Ticker',enabled:true},{id:'report',type:'report',label:'Report Preview',enabled:true},{id:'segments',type:'segments',label:"Who It's For",enabled:true},{id:'blocks',type:'blocks',label:'Content Blocks',enabled:true},{id:'articles',type:'articles',label:'Insights',enabled:true},{id:'news',type:'news',label:'News',enabled:true},{id:'people',type:'people',label:'Network',enabled:true},{id:'philosophy',type:'philosophy',label:'The Shelvion Principle',enabled:true},{id:'cta',type:'cta',label:'CTA',enabled:true},{id:'footer',type:'footer',label:'Footer',enabled:true}],
- hero:{eyebrow:'Modern website · reusable template',title:'Build a clear digital presence.',subtitle:'A configurable website system with a public site and content admin. Change the content without rebuilding the components.',primaryCta:'Get started',secondaryCta:'See how it works',image:'assets/hero-image-coffee.png',imageSize:48},
+ hero:{
+   eyebrow:'Modern website · reusable template',
+   title:'Build a clear digital presence.',
+   subtitle:'A configurable website system with a public site and content admin. Change the content without rebuilding the components.',
+   primaryCta:'Get started',
+   secondaryCta:'See how it works',
+   image:'assets/hero-image-coffee.png',
+   imageSize:48,
+   calibration:heroCalibration
+ },
  stats:[{value:'01',label:'Reusable system'},{value:'TSX',label:'Typed components'},{value:'Admin',label:'Content controls'},{value:'Local',label:'Easy to test'}],
  steps:[{title:'Configure the site',body:'Change your brand, navigation, sections and content from the admin panel.',icon:'01'},{title:'Edit the content',body:'Update headings, cards, articles, people and calls to action without touching JSX.',icon:'02'},{title:'Preview and publish',body:'Preview the public website, save configuration locally, then connect a real backend later.',icon:'03'}],
  findings:[{category:'Content',finding:'Hero headline updated successfully',status:'ok',statusText:'Ready'},{category:'Navigation',finding:'All primary links are configured',status:'ok',statusText:'Ready'},{category:'Sections',finding:'13 configurable sections available',status:'warn',statusText:'Customizable'}],
