@@ -160,12 +160,14 @@ export function HeroShelfAudit({
   }
 
 return (
-  <div
-    className="hero-audit-wrap"
-    style={{
-      width: `${imageSize}%`,
-    }}
-  >
+<div
+  className="hero-audit-wrap"
+  style={{
+    width: `${imageSize}%`,
+    height: 'auto',
+    aspectRatio: '16 / 9',
+  }}
+>
       <div
         className={`hero-audit-frame ${
           stage === 'scanning' ? 'scanning' : ''
