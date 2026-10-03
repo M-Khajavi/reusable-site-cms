@@ -157,8 +157,13 @@ export function HeroShelfAudit({
     return null
   }
 
-  return (
-    <div className="hero-audit-wrap">
+return (
+  <div
+    className="hero-audit-wrap"
+    style={{
+      width: `${imageSize}%`,
+    }}
+  >
       <div
         className={`hero-audit-frame ${
           stage === 'scanning' ? 'scanning' : ''
