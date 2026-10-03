@@ -21,8 +21,10 @@
 
 .hero-audit-wrap {
   position: absolute;
-  inset: 0;
-  width: 100% !important;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--hero-image-size, 48%);
   max-width: none !important;
   height: 100%;
   margin: 0;
