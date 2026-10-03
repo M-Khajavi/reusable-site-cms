@@ -11,6 +11,15 @@ const KEY = 'reusable-site-cms-config'
 function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
   if (!raw) return defaultConfig
 
+  const savedFooterAppearance = (raw.sections || []).find(
+    item => item.id === 'footer' || item.type === 'footer',
+  )?.appearance
+
+  const headerFooterColor =
+    raw.theme?.headerFooter ||
+    savedFooterAppearance?.backgroundColor ||
+    defaultConfig.theme.headerFooter
+
   return {
     ...defaultConfig,
     ...raw,
@@ -37,6 +46,7 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
     theme: {
       ...defaultConfig.theme,
       ...(raw.theme || {}),
+      headerFooter: headerFooterColor,
     },
     hero: {
       ...defaultConfig.hero,
@@ -44,9 +54,19 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
       calibration:
         raw.hero?.calibration || defaultConfig.hero.calibration,
     },
+    segments: (raw.segments || defaultConfig.segments).map((item, index) => ({
+      ...defaultConfig.segments[index % defaultConfig.segments.length],
+      ...item,
+      icon:
+        item.icon ??
+        defaultConfig.segments[index % defaultConfig.segments.length].icon,
+      bullets: item.bullets || [],
+    })),
     articles: {
       ...defaultConfig.articles,
       ...(raw.articles || {}),
+      viewAllHref:
+        raw.articles?.viewAllHref || defaultConfig.articles.viewAllHref,
       cardStyle: {
         ...defaultConfig.articles.cardStyle,
         ...(raw.articles?.cardStyle || {}),
@@ -55,6 +75,8 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
     news: {
       ...defaultConfig.news,
       ...(raw.news || {}),
+      viewAllHref:
+        raw.news?.viewAllHref || defaultConfig.news.viewAllHref,
       cardStyle: {
         ...defaultConfig.news.cardStyle,
         ...(raw.news?.cardStyle || {}),
@@ -63,6 +85,8 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
     people: {
       ...defaultConfig.people,
       ...(raw.people || {}),
+      pageHref:
+        raw.people?.pageHref || defaultConfig.people.pageHref,
       cardStyle: {
         ...defaultConfig.people.cardStyle,
         ...(raw.people?.cardStyle || {}),
@@ -76,6 +100,9 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
         appearance: {
           ...section.appearance,
           ...(saved?.appearance || {}),
+          ...(section.type === 'footer'
+            ? { backgroundColor: headerFooterColor }
+            : {}),
         },
         menu: {
           ...section.menu,
