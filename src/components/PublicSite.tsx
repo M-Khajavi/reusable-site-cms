@@ -13,7 +13,19 @@ export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: (
 )
   
   return <div className="site" style={{ '--primary': config.theme.primary, '--secondary': config.theme.secondary, '--ink': config.theme.ink, '--paper': config.theme.paper, '--grey': config.theme.grey, '--accent': config.theme.accent, '--dark': config.theme.dark, '--hero-image-size': `${heroSize}%` } as CSSProperties}>
-    <nav className="nav"><a className="brand" href="#">{config.brand.name}</a><div className="navlinks">{config.nav.map(n => <a key={n.href} href={n.href}>{n.label}</a>)}<a className="navcta" href="#cta">Get started</a></div></nav>
+    <nav className="nav">
+      <a className="brand" href="#">
+        {config.brand.logo ? (
+          <img className="brand-logo" src={config.brand.logo} alt={config.brand.name} />
+        ) : (
+          config.brand.name
+        )}
+      </a>
+      <div className="navlinks">
+        {config.nav.map(n => <a key={n.href} href={n.href}>{n.label}</a>)}
+        <a className="navcta" href="#cta">Get started</a>
+      </div>
+    </nav>
 
 {enabled('hero') && (
   <section
@@ -22,7 +34,13 @@ export function PublicSite({ config, onAdmin }: { config: SiteConfig; onAdmin: (
     background: '#0F3A5A',
   }}
 >
-    <div className="hero-copy">
+    <div
+      className="hero-copy"
+      style={{
+        '--hero-title-size': `${config.hero.titleSize ?? 100}px`,
+        '--hero-text-color': config.hero.textColor ?? '#FFFFFF',
+      } as CSSProperties}
+    >
       <span className="eyebrow">{config.hero.eyebrow}</span>
       <h1>{config.hero.title}</h1>
       <p>{config.hero.subtitle}</p>

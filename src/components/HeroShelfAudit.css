@@ -1,92 +1,4 @@
 /* =========================================================
-   SHELVION HERO SHELF AUDIT
-   Clean Hero layout
-   ========================================================= */
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
-.hero {
-  position: relative;
-
-  width: 100%;
-  min-height: 0;
-  height: auto;
-
-  margin-top: 68px;
-
-  padding: 0;
-
-  overflow: hidden;
-
-  display: block;
-
-  background: #0F3A5A !important;
-  color: #fff;
-}
-
-/*
-  The Hero image is the normal-flow element.
-  Therefore its 16:9 height determines the Hero height.
-*/
-.hero-audit-wrap {
-  position: relative;
-
-  display: block;
-
-  width: var(--hero-image-size, 48%);
-  height: auto;
-
-  aspect-ratio: 16 / 9;
-
-  margin-left: auto;
-  margin-right: 0;
-
-  max-width: none !important;
-
-  z-index: 1;
-}
-
-/* =========================================================
-   HERO TEXT
-   ========================================================= */
-
-/*
-  Text is layered over the Hero.
-  It does NOT determine Hero height.
-*/
-.hero-copy {
-  position: absolute;
-
-  top: 50%;
-  left: 8vw;
-
-  width: min(760px, 72%);
-  max-width: 760px;
-
-  transform: translateY(-50%);
-
-  z-index: 20;
-
-  background: transparent !important;
-
-  pointer-events: auto;
-}
-
-.hero-copy .eyebrow {
-  color: #4ECACE;
-}
-
-.hero-copy h1 {
-  color: #fff;
-}
-
-.hero-copy p {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-/* =========================================================
    FRAME
    ========================================================= */
 
@@ -615,103 +527,30 @@
 }
 
 /* =========================================================
-   TABLET
+   AUDIT UI RESPONSIVE RULES
+   These rules do not control page Hero layout.
    ========================================================= */
 
 @media (max-width: 800px) {
-  .hero {
-    margin-top: 68px;
-
-    min-height: 0;
-
-    padding: 0;
-
-    background: #0F3A5A !important;
-  }
-
-  /*
-    On mobile the image occupies the full width.
-    Its 16:9 ratio determines Hero height.
-  */
-  .hero-audit-wrap {
-    width: 100% !important;
-
-    height: auto;
-
-    aspect-ratio: 16 / 9;
-
-    margin: 0;
-
-    max-width: none !important;
-  }
-
-  .hero-copy {
-    top: 50%;
-    left: 6vw;
-
-    width: 88%;
-    max-width: 88%;
-
-    transform: translateY(-50%);
-  }
-
-  .hero-copy h1 {
-    font-size: clamp(34px, 9vw, 58px);
-  }
-
-  .hero-copy p {
-    font-size: 15px;
-    line-height: 1.55;
-  }
-
   .hero-audit-brand-card {
     right: 2%;
     top: 10%;
-
     min-width: 155px;
-
     font-size: 0.54rem;
   }
 
   .hero-audit-product-card {
     min-width: 160px;
-
     max-width: 200px;
-
     font-size: 0.51rem;
   }
 }
 
-/* =========================================================
-   SMALL MOBILE
-   ========================================================= */
-
 @media (max-width: 620px) {
-  .hero-copy {
-    left: 5vw;
-
-    width: 90%;
-    max-width: 90%;
-  }
-
-  .hero-copy h1 {
-    font-size: clamp(30px, 8.5vw, 42px);
-
-    margin-bottom: 14px;
-  }
-
-  .hero-copy p {
-    font-size: 13px;
-
-    line-height: 1.45;
-  }
-
   .hero-audit-status {
     top: 10px;
     left: 10px;
-
     font-size: 0.5rem;
-
     padding: 0.4rem 0.55rem;
   }
 
@@ -719,21 +558,15 @@
     top: auto;
     right: 2%;
     bottom: 2%;
-
     min-width: 145px;
-
     padding: 0.55rem;
-
     font-size: 0.49rem;
   }
 
   .hero-audit-product-card {
-    min-width: 130px;
-
     max-width: 155px;
-
+    min-width: 130px;
     padding: 0.55rem;
-
     font-size: 0.47rem;
   }
 }
