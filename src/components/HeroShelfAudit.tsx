@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
+import type { HeroBrandCalibration } from '../types/site'
 
 type Product = {
   variant: string
@@ -61,14 +62,19 @@ const BRANDS: Brand[] = [
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-export function HeroShelfAudit({ image }: { image: string }) {
+export function HeroShelfAudit({
+  image,
+  brands,
+}: {
+  image: string
+  brands: HeroBrandCalibration[]
+}) {
   const [brandIndex, setBrandIndex] = useState(0)
   const [stage, setStage] = useState<'scanning' | 'brand' | 'complete'>('scanning')
   const [productIndex, setProductIndex] = useState(-1)
   const [brandText, setBrandText] = useState('')
   const [productText, setProductText] = useState('')
 
-  const brand = BRANDS[brandIndex]
   const product = brand.products[productIndex]
 
   const spotStyle = useMemo<CSSProperties>(() => ({
