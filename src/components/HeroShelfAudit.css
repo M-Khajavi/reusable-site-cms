@@ -15,3 +15,82 @@
 .hero-audit-product-card {
   white-space: nowrap;
 }
+/* =========================================================
+   HERO FULL-WIDTH MODE
+   ========================================================= */
+
+.hero-audit-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100%;
+  margin: 0;
+  z-index: 1;
+}
+
+.hero-audit-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+
+.hero-audit-img,
+.hero-audit-spotlight img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Text remains above the image */
+.hero-copy {
+  position: relative;
+  z-index: 20;
+}
+
+.hero {
+  position: relative;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+.hero-audit-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 58, 90, 0.78) 0%,
+    rgba(15, 58, 90, 0.42) 32%,
+    rgba(15, 58, 90, 0.08) 62%,
+    transparent 100%
+  );
+}
+
+@media (max-width: 800px) {
+  .hero-audit-wrap {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100%;
+  }
+
+  .hero-audit-frame {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 20;
+    max-width: 100%;
+  }
+}
