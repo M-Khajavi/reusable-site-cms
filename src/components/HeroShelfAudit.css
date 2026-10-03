@@ -1,98 +1,657 @@
-.hero-audit-wrap{width:100%;max-width:660px;justify-self:end;align-self:center}.hero-audit-frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:#0b2437;box-shadow:0 30px 80px rgba(0,0,0,.25)}
-.hero-audit-img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;display:block;visibility:visible;opacity:1}.hero-audit-dim{position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:2;pointer-events:none}.hero-audit-spotlight{position:absolute;inset:0;z-index:3;overflow:hidden;clip-path:inset(var(--spot-y) var(--spot-r) var(--spot-b) var(--spot-x))}.hero-audit-spotlight img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(1.03)}
-.hero-audit-scan{position:absolute;left:0;right:0;height:2px;top:-3px;background:linear-gradient(90deg,transparent 0%,var(--brand-color) 18%,var(--brand-color) 82%,transparent 100%);box-shadow:0 0 14px var(--brand-color),0 0 30px rgba(78,202,206,.45);z-index:9;opacity:0;pointer-events:none}.hero-audit-frame.scanning .hero-audit-scan{animation:heroAuditScan 1.9s ease-in-out forwards;opacity:1}@keyframes heroAuditScan{0%{top:0;opacity:0}12%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
-.hero-audit-status{position:absolute;top:14px;left:14px;z-index:10;font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:#fff;background:rgba(20,25,30,.74);border:1px solid rgba(255,255,255,.12);padding:.48rem .7rem;border-radius:3px;backdrop-filter:blur(8px)}.hero-audit-status::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--brand-color);margin-right:.45rem;box-shadow:0 0 8px var(--brand-color)}
-.hero-audit-box{position:absolute;z-index:7;border:1px solid var(--brand-color);box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 18px var(--brand-color);border-radius:3px;opacity:0;pointer-events:none;transition:left .35s ease,top .35s ease,width .35s ease,height .35s ease,opacity .25s ease}.hero-audit-box.active{opacity:1}.hero-audit-box::before,.hero-audit-box::after{content:'';position:absolute;width:14px;height:14px;border-color:var(--brand-color);border-style:solid;filter:drop-shadow(0 0 6px var(--brand-color))}.hero-audit-box::before{left:-2px;top:-2px;border-width:2px 0 0 2px}.hero-audit-box::after{right:-2px;bottom:-2px;border-width:0 2px 2px 0}.hero-audit-box .corner-tr,.hero-audit-box .corner-bl{position:absolute;width:14px;height:14px;border-color:var(--brand-color);border-style:solid}.hero-audit-box .corner-tr{right:-2px;top:-2px;border-width:2px 2px 0 0}.hero-audit-box .corner-bl{left:-2px;bottom:-2px;border-width:0 0 2px 2px}
-.hero-audit-brand-card,.hero-audit-product-card,.hero-audit-complete{position:absolute;z-index:11;background:rgba(16,20,24,.88);border:1px solid var(--brand-color);border-radius:4px;box-shadow:0 12px 28px rgba(0,0,0,.22);backdrop-filter:blur(10px);font-family:'IBM Plex Mono',monospace;color:#fff;opacity:0;transform:translateY(6px);transition:opacity .25s ease,transform .25s ease;pointer-events:none}.hero-audit-brand-card.show,.hero-audit-product-card.show,.hero-audit-complete.show{opacity:1;transform:translateY(0)}.hero-audit-brand-card{top:18%;right:2.5%;min-width:170px;padding:.7rem .8rem;font-size:.61rem;line-height:1.65}.hero-audit-product-card{min-width:190px;max-width:250px;padding:.7rem .8rem;font-size:.58rem;line-height:1.6}.hero-audit-card-label{color:rgba(255,255,255,.46);text-transform:uppercase;letter-spacing:.08em;font-size:.5rem;margin-bottom:.2rem}
-.hero-audit-complete{inset:50% auto auto 50%;transform:translate(-50%,-45%);width:min(270px,76%);padding:1rem;text-align:center}.hero-audit-complete.show{transform:translate(-50%,-50%)}.hero-audit-complete .title{font-size:.72rem;letter-spacing:.12em;color:#fff;margin-bottom:.65rem}.hero-audit-complete .line{font-size:.56rem;color:rgba(255,255,255,.55);margin:.25rem 0}.hero-audit-complete .ok{margin-top:.5rem;color:#4ECACE;font-size:.58rem}
-.hero-audit-product-marker{position:absolute;z-index:10;border:1px solid var(--brand-color);border-radius:2px;opacity:0;transform:scale(.96);transition:opacity .2s ease,transform .25s ease;box-shadow:0 0 12px var(--brand-color);pointer-events:none}.hero-audit-product-marker.show{opacity:1;transform:scale(1)}.hero-audit-product-marker::after{content:'';position:absolute;left:-1px;top:-1px;width:7px;height:7px;border-top:2px solid var(--brand-color);border-left:2px solid var(--brand-color)}
-@media(max-width:800px){.hero-audit-wrap{max-width:none}.hero-audit-frame{aspect-ratio:16/9}.hero-audit-brand-card{right:2%;top:10%;min-width:155px;font-size:.54rem}.hero-audit-product-card{min-width:160px;max-width:200px;font-size:.51rem}}@media(max-width:620px){.hero-audit-status{font-size:.5rem;padding:.4rem .55rem}.hero-audit-brand-card{top:auto;right:2%;bottom:2%;min-width:145px;padding:.55rem;font-size:.49rem}.hero-audit-product-card{max-width:155px;min-width:130px;padding:.55rem;font-size:.47rem}}
-@media(prefers-reduced-motion:reduce){.hero-audit-scan{animation:none!important}.hero-audit-frame.scanning .hero-audit-scan{display:none}}
+/*
+  Shelvion Hero Shelf Audit
+  Full replacement CSS
+
+  Layout rules:
+  - Hero has one navy area.
+  - Hero image width is controlled by the Admin imageSize value.
+  - Image height follows 16:9 proportion.
+  - Hero section height follows the image height.
+  - Text is layered above the image.
+  - At 100%, the image covers the full Hero width.
+  - Calibration coordinates use the displayed image itself as the reference.
+*/
+
+/* =========================================================
+   HERO CONTAINER
+   ========================================================= */
+
+.hero {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  background: #0F3A5A !important;
+  color: #fff;
+}
+
+/*
+  The text is removed from normal flow so the image wrapper
+  becomes the element that determines Hero height.
+*/
+.hero-copy {
+  position: absolute;
+  top: 50%;
+  left: 8vw;
+  z-index: 20;
+  width: min(760px, 72%);
+  max-width: 760px;
+  transform: translateY(-50%);
+  background: transparent !important;
+}
+
+/* =========================================================
+   HERO IMAGE WRAPPER
+   ========================================================= */
+
+/*
+  IMPORTANT:
+  PublicSite / HeroShelfAudit passes the selected imageSize
+  as an inline width. Do not use width:100% here.
+
+  Because this wrapper is in normal flow and has a 16:9
+  aspect ratio, the wrapper determines the Hero height.
+*/
+.hero-audit-wrap {
+  position: relative;
+  display: block;
+
+  width: var(--hero-image-size, 48%);
+  height: auto;
+  aspect-ratio: 16 / 9;
+
+  margin-left: auto;
+  margin-right: 0;
+
+  max-width: none !important;
+
+  z-index: 1;
+}
+
+/* =========================================================
+   IMAGE / FRAME
+   ========================================================= */
+
+.hero-audit-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+
+  overflow: hidden;
+
+  border: 0;
+  border-radius: 0;
+  background: #0b2437;
+  box-shadow: none;
+}
+
+/*
+  Use fill rather than cover.
+  This keeps every percentage calibration coordinate
+  aligned with the actual displayed image area.
+*/
+.hero-audit-img {
+  position: absolute;
+  inset: 0;
+
+  z-index: 1;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: fill;
+
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+.hero-audit-spotlight {
+  position: absolute;
+  inset: 0;
+
+  z-index: 3;
+
+  overflow: hidden;
+
+  clip-path: inset(
+    var(--spot-y)
+    var(--spot-r)
+    var(--spot-b)
+    var(--spot-x)
+  );
+}
+
+.hero-audit-spotlight img {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: fill;
+  filter: brightness(1.03);
+}
+
+/* =========================================================
+   DARKENING / READABILITY
+   ========================================================= */
+
+.hero-audit-dim {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  background: rgba(0, 0, 0, 0.42);
+
+  pointer-events: none;
+}
+
+/*
+  Dark-to-transparent layer toward the text side.
+  This is an image overlay, not a text background.
+*/
+.hero-audit-wrap::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: 4;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    90deg,
+    rgba(15, 58, 90, 0.78) 0%,
+    rgba(15, 58, 90, 0.46) 28%,
+    rgba(15, 58, 90, 0.12) 58%,
+    transparent 100%
+  );
+}
+
+/* =========================================================
+   SCAN LINE
+   ========================================================= */
+
+.hero-audit-scan {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  top: -3px;
+
+  height: 2px;
+
+  z-index: 9;
+
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--brand-color) 18%,
+    var(--brand-color) 82%,
+    transparent 100%
+  );
+
+  box-shadow:
+    0 0 14px var(--brand-color),
+    0 0 30px rgba(78, 202, 206, 0.45);
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.hero-audit-frame.scanning .hero-audit-scan {
+  animation: heroAuditScan 1.9s ease-in-out forwards;
+  opacity: 1;
+}
+
+@keyframes heroAuditScan {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   STATUS LABEL
+   ========================================================= */
+
+.hero-audit-status {
+  position: absolute;
+
+  top: 14px;
+  left: 14px;
+
+  z-index: 10;
+
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+
+  color: #fff;
+
+  background: rgba(20, 25, 30, 0.74);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+
+  padding: 0.48rem 0.7rem;
+
+  backdrop-filter: blur(8px);
+}
+
+.hero-audit-status::before {
+  content: '';
+
+  display: inline-block;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: var(--brand-color);
+
+  margin-right: 0.45rem;
+
+  box-shadow: 0 0 8px var(--brand-color);
+}
+
+/* =========================================================
+   BRAND DETECTION BOX
+   ========================================================= */
+
+.hero-audit-box {
+  position: absolute;
+
+  z-index: 7;
+
+  border: 1px solid var(--brand-color);
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 18px var(--brand-color);
+
+  border-radius: 3px;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    left 0.35s ease,
+    top 0.35s ease,
+    width 0.35s ease,
+    height 0.35s ease,
+    opacity 0.25s ease;
+}
+
+.hero-audit-box.active {
+  opacity: 1;
+}
+
+.hero-audit-box::before,
+.hero-audit-box::after {
+  content: '';
+
+  position: absolute;
+
+  width: 14px;
+  height: 14px;
+
+  border-color: var(--brand-color);
+  border-style: solid;
+
+  filter: drop-shadow(0 0 6px var(--brand-color));
+}
+
+.hero-audit-box::before {
+  left: -2px;
+  top: -2px;
+
+  border-width: 2px 0 0 2px;
+}
+
+.hero-audit-box::after {
+  right: -2px;
+  bottom: -2px;
+
+  border-width: 0 2px 2px 0;
+}
+
+.hero-audit-box .corner-tr,
+.hero-audit-box .corner-bl {
+  position: absolute;
+
+  width: 14px;
+  height: 14px;
+
+  border-color: var(--brand-color);
+  border-style: solid;
+}
+
+.hero-audit-box .corner-tr {
+  right: -2px;
+  top: -2px;
+
+  border-width: 2px 2px 0 0;
+}
+
+.hero-audit-box .corner-bl {
+  left: -2px;
+  bottom: -2px;
+
+  border-width: 0 0 2px 2px;
+}
+
+/* =========================================================
+   INFORMATION CARDS
+   ========================================================= */
+
+.hero-audit-brand-card,
+.hero-audit-product-card,
+.hero-audit-complete {
+  position: absolute;
+
+  z-index: 11;
+
+  background: rgba(16, 20, 24, 0.88);
+
+  border: 1px solid var(--brand-color);
+
+  border-radius: 4px;
+
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+
+  backdrop-filter: blur(10px);
+
+  font-family: 'IBM Plex Mono', monospace;
+  color: #fff;
+
+  opacity: 0;
+
+  transform: translateY(6px);
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+
+  pointer-events: none;
+}
+
+.hero-audit-brand-card.show,
+.hero-audit-product-card.show,
+.hero-audit-complete.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-audit-brand-card {
+  top: 18%;
+  right: 2.5%;
+
+  min-width: 170px;
+
+  padding: 0.7rem 0.8rem;
+
+  font-size: 0.61rem;
+  line-height: 1.65;
+}
+
+.hero-audit-card-label {
+  color: rgba(255, 255, 255, 0.46);
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  font-size: 0.5rem;
+
+  margin-bottom: 0.2rem;
+}
+
 .hero-audit-card-value {
   white-space: nowrap;
 }
 
 .hero-audit-product-card {
+  min-width: 190px;
+  max-width: 250px;
+
+  padding: 0.7rem 0.8rem;
+
+  font-size: 0.58rem;
+  line-height: 1.6;
+
   white-space: nowrap;
 }
+
 /* =========================================================
-   HERO FULL-WIDTH MODE
+   AUDIT COMPLETE
    ========================================================= */
 
-.hero-audit-wrap {
+.hero-audit-complete {
+  inset: 50% auto auto 50%;
+
+  transform: translate(-50%, -45%);
+
+  width: min(270px, 76%);
+
+  padding: 1rem;
+
+  text-align: center;
+}
+
+.hero-audit-complete.show {
+  transform: translate(-50%, -50%);
+}
+
+.hero-audit-complete .title {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+
+  color: #fff;
+
+  margin-bottom: 0.65rem;
+}
+
+.hero-audit-complete .line {
+  font-size: 0.56rem;
+
+  color: rgba(255, 255, 255, 0.55);
+
+  margin: 0.25rem 0;
+}
+
+.hero-audit-complete .ok {
+  margin-top: 0.5rem;
+
+  color: #4ECACE;
+
+  font-size: 0.58rem;
+}
+
+/* =========================================================
+   PRODUCT MARKER
+   ========================================================= */
+
+.hero-audit-product-marker {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: var(--hero-image-size, 48%);
-  max-width: none !important;
-  height: 100%;
-  margin: 0;
-  z-index: 1;
-}
 
-.hero-audit-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  aspect-ratio: auto;
-  border: 0;
-  border-radius: 0;
-}
+  z-index: 10;
 
-.hero-audit-img,
-.hero-audit-spotlight img {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-}
+  border: 1px solid var(--brand-color);
 
-/* Text remains above the image */
-.hero-copy {
-  position: relative;
-  z-index: 20;
-}
+  border-radius: 2px;
 
-.hero {
-  position: relative;
-  background: transparent !important;
-  overflow: hidden;
-}
+  opacity: 0;
 
-.hero-audit-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  transform: scale(0.96);
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s ease;
+
+  box-shadow: 0 0 12px var(--brand-color);
+
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    rgba(15, 58, 90, 0.78) 0%,
-    rgba(15, 58, 90, 0.42) 32%,
-    rgba(15, 58, 90, 0.08) 62%,
-    transparent 100%
-  );
 }
+
+.hero-audit-product-marker.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero-audit-product-marker::after {
+  content: '';
+
+  position: absolute;
+
+  left: -1px;
+  top: -1px;
+
+  width: 7px;
+  height: 7px;
+
+  border-top: 2px solid var(--brand-color);
+  border-left: 2px solid var(--brand-color);
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-audit-scan {
+    animation: none !important;
+  }
+
+  .hero-audit-frame.scanning .hero-audit-scan {
+    display: none;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
 @media (max-width: 800px) {
-  .hero-audit-wrap {
+  .hero {
+    display: block;
+
+    width: 100%;
+
+    min-height: 0;
+
+    padding: 0;
+
+    background: #0F3A5A !important;
+  }
+
+  .hero-copy {
     position: absolute;
-    inset: 0;
+
+    top: 50%;
+    left: 6vw;
+
+    width: 88%;
+    max-width: none;
+
+    transform: translateY(-50%);
+
+    z-index: 20;
+  }
+
+  .hero-audit-wrap {
+    position: relative;
+
     width: 100% !important;
+
+    height: auto;
+
+    aspect-ratio: 16 / 9;
+
+    margin: 0;
+
     max-width: none !important;
-    height: 100%;
   }
 
   .hero-audit-frame {
     width: 100%;
     height: 100%;
+
     aspect-ratio: auto;
+
+    border-radius: 0;
   }
 
-  .hero-copy {
-    position: relative;
-    z-index: 20;
-    max-width: 100%;
+  .hero-audit-img,
+  .hero-audit-spotlight img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: fill;
+  }
+
+  .hero-audit-brand-card {
+    right: 2%;
+    top: 10%;
+
+    min-width: 155px;
+
+    font-size: 0.54rem;
+  }
+
+  .hero-audit-product-card {
+    min-width: 160px;
+    max-width: 200px;
+
+    font-size: 0.51rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .hero-audit-status {
+    font-size: 0.5rem;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .hero-audit-brand-card {
+    top: auto;
+    right: 2%;
+    bottom: 2%;
+
+    min-width: 145px;
+
+    padding: 0.55rem;
+
+    font-size: 0.49rem;
+  }
+
+  .hero-audit-product-card {
+    max-width: 155px;
+    min-width: 130px;
+
+    padding: 0.55rem;
+
+    font-size: 0.47rem;
   }
 }
