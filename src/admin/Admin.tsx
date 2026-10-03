@@ -210,7 +210,7 @@ function HeroEditor({ config, update, pickImage }: { config: SiteConfig; update:
       <Field label="Secondary button" value={config.hero.secondaryCta} onChange={v => update(c => c.hero.secondaryCta = v)} />
     </div>
     <ImageEditor label="Hero image" value={config.hero.image} onChange={v => update(c => c.hero.image = v)} onUpload={() => pickImage('hero')} />
-    <label className="admin-field"><span>Hero image size (%)</span><input type="number" min={25} max={70} value={config.hero.imageSize ?? 48} onChange={e => update(c => c.hero.imageSize = Math.min(70, Math.max(25, Number(e.target.value) || 48)))} /><small className="field-help">Controls the visual column width on desktop.</small></label>
+    <label className="admin-field"><span>Hero image size (%)</span><input type="number" min={25} max={90} value={config.hero.imageSize ?? 48} onChange={e => update(c => c.hero.imageSize = Math.min(90, Math.max(25, Number(e.target.value) || 48)))} /><small className="field-help">Controls the visual column width on desktop.</small></label>
   </Panel>
 }
 
