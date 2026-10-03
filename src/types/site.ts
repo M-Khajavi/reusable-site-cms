@@ -28,7 +28,7 @@ export interface Section {
 export interface Stat { value: string; label: string }
 export interface Step { title: string; body: string; icon: string }
 export interface Finding { category: string; finding: string; status: 'ok' | 'warn' | 'critical'; statusText: string }
-export interface Segment { title: string; description: string; bullets: string[] }
+export interface Segment { title: string; description: string; bullets: string[]; icon: string }
 export interface ContentBlock { title: string; eyebrow: string; body: string; image: string; layout: 'left' | 'right' | 'none'; background: 'white' | 'paper' | 'dark' }
 export interface Article { title: string; category: string; excerpt: string; date: string }
 export interface Person { name: string; role: string; region: string; bio: string }
@@ -81,7 +81,7 @@ export interface HeaderConfig {
 
 export interface SiteConfig {
   brand: { name: string; tagline: string; logo: string }
-  theme: { primary: string; secondary: string; ink: string; paper: string; grey: string; accent: string; dark: string }
+  theme: { primary: string; secondary: string; ink: string; paper: string; grey: string; accent: string; dark: string; headerFooter: string }
   nav: { label: string; href: string }[]
   header: HeaderConfig
   sections: Section[]
@@ -104,9 +104,9 @@ export interface SiteConfig {
   report: { title: string; store: string; category: string; metrics: { label: string; value: string }[] }
   segments: Segment[]
   blocks: ContentBlock[]
-  articles: { heading: string; subtitle: string; effect: EffectType; cardStyle: CardStyle; items: Article[] }
-  news: { heading: string; subtitle: string; effect: EffectType; cardStyle: CardStyle; items: Article[] }
-  people: { heading: string; subtitle: string; effect: EffectType; cardStyle: CardStyle; items: Person[] }
+  articles: { heading: string; subtitle: string; effect: EffectType; cardStyle: CardStyle; viewAllHref: string; items: Article[] }
+  news: { heading: string; subtitle: string; effect: EffectType; cardStyle: CardStyle; viewAllHref: string; items: Article[] }
+  people: { heading: string; subtitle: string; effect: EffectType; cardStyle: CardStyle; pageHref: string; items: Person[] }
   philosophy: { eyebrow: string; title: string; body: string; lines: PrincipleLine[] }
   cta: { title: string; body: string; button: string }
   footer: string
