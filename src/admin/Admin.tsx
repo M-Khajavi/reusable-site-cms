@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type {
   CardShadow,
@@ -8,6 +8,7 @@ import type {
   MenuVariant,
   SectionType,
   SiteConfig,
+  TranslationMap,
 } from '../types/site'
 
 type Props = {
@@ -17,7 +18,74 @@ type Props = {
 }
 
 type Tab = SectionType | 'site' | 'theme' | 'navigation'
-type ImageTarget = 'hero' | 'logo' | number
+type ImageTarget =
+  | 'hero'
+  | 'logo'
+  | { kind: 'block' | 'step' | 'segment'; index: number }
+
+type AdminI18n = {
+  language: string
+  languages: string[]
+  defaultLanguage: string
+  translations: TranslationMap
+  setLanguage: (language: string) => void
+  setTranslation: (key: string, value: string) => void
+}
+
+const AdminI18nContext = createContext<AdminI18n | null>(null)
+
+function AdminI18nProvider({
+  config,
+  update,
+  children,
+}: {
+  config: SiteConfig
+  update: (f: (c: SiteConfig) => void) => void
+  children: ReactNode
+}) {
+  const languages = config.header.language.options?.length
+    ? config.header.language.options
+    : ['EN']
+  const defaultLanguage =
+    config.header.language.defaultLanguage || languages[0] || 'EN'
+  const [language, setLanguage] = useState(defaultLanguage)
+
+  useEffect(() => {
+    if (!languages.includes(language)) {
+      setLanguage(defaultLanguage)
+    }
+  }, [languages.join('|'), language, defaultLanguage])
+
+  const setTranslation = (key: string, value: string) => {
+    if (!key || language === defaultLanguage) return
+
+    update(draft => {
+      if (!draft.translations) draft.translations = {}
+      if (!draft.translations[key]) draft.translations[key] = {}
+      draft.translations[key][language] = value
+    })
+  }
+
+  return (
+    <AdminI18nContext.Provider
+      value={{
+        language,
+        languages,
+        defaultLanguage,
+        translations: config.translations || {},
+        setLanguage,
+        setTranslation,
+      }}
+    >
+      {children}
+    </AdminI18nContext.Provider>
+  )
+}
+
+function useAdminI18n() {
+  return useContext(AdminI18nContext)
+}
+
 
 export function Admin({ config, onChange, onPublic }: Props) {
   const [active, setActive] = useState<Tab>('site')
@@ -78,8 +146,18 @@ export function Admin({ config, onChange, onPublic }: Props) {
           draft.hero.image = value
         } else if (imageTarget === 'logo') {
           draft.brand.logo = value
-        } else if (draft.blocks[imageTarget]) {
-          draft.blocks[imageTarget].image = value
+        } else if (imageTarget.kind === 'block') {
+          if (draft.blocks[imageTarget.index]) {
+            draft.blocks[imageTarget.index].image = value
+          }
+        } else if (imageTarget.kind === 'step') {
+          if (draft.steps[imageTarget.index]) {
+            draft.steps[imageTarget.index].icon = value
+          }
+        } else if (imageTarget.kind === 'segment') {
+          if (draft.segments[imageTarget.index]) {
+            draft.segments[imageTarget.index].icon = value
+          }
         }
       })
 
@@ -99,7 +177,8 @@ export function Admin({ config, onChange, onPublic }: Props) {
   }
 
   return (
-    <div className="admin-shell">
+    <AdminI18nProvider config={config} update={update}>
+      <div className="admin-shell">
       <input
         ref={fileInput}
         type="file"
@@ -245,7 +324,7 @@ export function Admin({ config, onChange, onPublic }: Props) {
             <StatsEditor config={config} update={update} />
           )}
           {active === 'steps' && (
-            <StepsEditor config={config} update={update} />
+            <StepsEditor config={config} update={update} pickImage={pickImage} />
           )}
           {active === 'ticker' && (
             <TickerEditor config={config} update={update} />
@@ -254,7 +333,7 @@ export function Admin({ config, onChange, onPublic }: Props) {
             <ReportEditor config={config} update={update} />
           )}
           {active === 'segments' && (
-            <SegmentsEditor config={config} update={update} />
+            <SegmentsEditor config={config} update={update} pickImage={pickImage} />
           )}
           {active === 'blocks' && (
             <BlocksEditor
@@ -291,7 +370,8 @@ export function Admin({ config, onChange, onPublic }: Props) {
           )}
         </main>
       </div>
-    </div>
+      </div>
+    </AdminI18nProvider>
   )
 }
 
@@ -321,27 +401,64 @@ function Field({
   onChange,
   multiline = false,
   placeholder,
+  translationKey,
+  translate = true,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   multiline?: boolean
   placeholder?: string
+  translationKey?: string
+  translate?: boolean
 }) {
+  const i18n = useAdminI18n()
+  const localized = Boolean(translate && translationKey && i18n)
+  const isTranslationLanguage =
+    localized && i18n!.language !== i18n!.defaultLanguage
+  const translatedValue =
+    isTranslationLanguage && translationKey
+      ? i18n!.translations[translationKey]?.[i18n!.language] ?? ''
+      : value
+
+  const handleChange = (next: string) => {
+    if (isTranslationLanguage && translationKey) {
+      i18n!.setTranslation(translationKey, next)
+      return
+    }
+    onChange(next)
+  }
+
   return (
     <label className="admin-field">
-      <span>{label}</span>
+      <div className="admin-field-label-row">
+        <span>{label}</span>
+        {localized && (
+          <select
+            className="field-language-select"
+            value={i18n!.language}
+            onChange={event => i18n!.setLanguage(event.target.value)}
+            aria-label={`${label} language`}
+          >
+            {i18n!.languages.map(language => (
+              <option key={language} value={language}>
+                {language}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
       {multiline ? (
         <textarea
-          value={value}
-          placeholder={placeholder}
-          onChange={event => onChange(event.target.value)}
+          value={translatedValue}
+          placeholder={isTranslationLanguage ? `Translation for ${i18n!.language}` : placeholder}
+          onChange={event => handleChange(event.target.value)}
         />
       ) : (
         <input
-          value={value}
-          placeholder={placeholder}
-          onChange={event => onChange(event.target.value)}
+          value={translatedValue}
+          placeholder={isTranslationLanguage ? `Translation for ${i18n!.language}` : placeholder}
+          onChange={event => handleChange(event.target.value)}
         />
       )}
     </label>
@@ -597,11 +714,13 @@ function SiteEditor({
           label="Brand name"
           value={config.brand.name}
           onChange={value => update(c => (c.brand.name = value))}
+          translationKey="brand.name"
         />
         <Field
           label="Tagline"
           value={config.brand.tagline}
           onChange={value => update(c => (c.brand.tagline = value))}
+          translationKey="brand.tagline"
         />
       </div>
 
@@ -664,6 +783,7 @@ function NavigationEditor({
                   if (current) current.menu.label = value
                 })
               }
+              translationKey={`sections.${section.id}.menu.label`}
             />
 
             <label className="admin-field">
@@ -732,6 +852,7 @@ function NavigationEditor({
             onChange={value =>
               update(c => (c.header.login.label = value))
             }
+            translationKey="header.login.label"
           />
           <Field
             label="Link"
@@ -739,6 +860,7 @@ function NavigationEditor({
             onChange={value =>
               update(c => (c.header.login.href = value))
             }
+            translate={false}
           />
           <label className="admin-field">
             <span>Type</span>
@@ -776,6 +898,7 @@ function NavigationEditor({
         <Field
           label="Languages (comma separated)"
           value={config.header.language.options.join(', ')}
+          translate={false}
           onChange={value =>
             update(c => {
               c.header.language.options = value
@@ -892,6 +1015,7 @@ function HeroEditor({
         label="Eyebrow"
         value={config.hero.eyebrow}
         onChange={value => update(c => (c.hero.eyebrow = value))}
+        translationKey="hero.eyebrow"
       />
 
       <Field
@@ -899,6 +1023,7 @@ function HeroEditor({
         value={config.hero.title}
         onChange={value => update(c => (c.hero.title = value))}
         multiline
+        translationKey="hero.title"
       />
 
       <Field
@@ -906,23 +1031,81 @@ function HeroEditor({
         value={config.hero.subtitle}
         onChange={value => update(c => (c.hero.subtitle = value))}
         multiline
+        translationKey="hero.subtitle"
       />
 
-      <div className="admin-grid two">
-        <Field
-          label="Primary button"
-          value={config.hero.primaryCta}
-          onChange={value =>
-            update(c => (c.hero.primaryCta = value))
-          }
-        />
-        <Field
-          label="Secondary button"
-          value={config.hero.secondaryCta}
-          onChange={value =>
-            update(c => (c.hero.secondaryCta = value))
-          }
-        />
+      <div className="hero-button-admin-grid">
+        <div className="repeat-card compact">
+          <div className="menu-item-admin-header">
+            <strong>Primary button</strong>
+            <label className="inline-check">
+              <input
+                type="checkbox"
+                checked={config.hero.primaryButton.enabled}
+                onChange={event =>
+                  update(c => {
+                    c.hero.primaryButton.enabled = event.target.checked
+                  })
+                }
+              />
+              Show button
+            </label>
+          </div>
+          <Field
+            label="Text"
+            value={config.hero.primaryButton.label}
+            onChange={value =>
+              update(c => {
+                c.hero.primaryButton.label = value
+                c.hero.primaryCta = value
+              })
+            }
+            translationKey="hero.primaryButton.label"
+          />
+          <Field
+            label="Link"
+            value={config.hero.primaryButton.href}
+            onChange={value => update(c => (c.hero.primaryButton.href = value))}
+            translate={false}
+            placeholder="#cta, /page or https://..."
+          />
+        </div>
+
+        <div className="repeat-card compact">
+          <div className="menu-item-admin-header">
+            <strong>Secondary button</strong>
+            <label className="inline-check">
+              <input
+                type="checkbox"
+                checked={config.hero.secondaryButton.enabled}
+                onChange={event =>
+                  update(c => {
+                    c.hero.secondaryButton.enabled = event.target.checked
+                  })
+                }
+              />
+              Show button
+            </label>
+          </div>
+          <Field
+            label="Text"
+            value={config.hero.secondaryButton.label}
+            onChange={value =>
+              update(c => {
+                c.hero.secondaryButton.label = value
+                c.hero.secondaryCta = value
+              })
+            }
+            translationKey="hero.secondaryButton.label"
+          />
+          <Field
+            label="Link"
+            value={config.hero.secondaryButton.href}
+            onChange={value => update(c => (c.hero.secondaryButton.href = value))}
+            translate={false}
+            placeholder="#steps, /page or https://..."
+          />
+        </div>
       </div>
 
       <ImageEditor
@@ -1152,11 +1335,13 @@ function ImageEditor({
   value,
   onChange,
   onUpload,
+  previewSize,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   onUpload: () => void
+  previewSize?: number
 }) {
   return (
     <div className="image-editor">
@@ -1170,13 +1355,15 @@ function ImageEditor({
         value={value}
         onChange={onChange}
         placeholder="https://... or uploaded image"
+        translate={false}
       />
 
       {value && (
         <img
-          className="admin-image-preview"
+          className={`admin-image-preview ${previewSize ? 'admin-image-preview-icon' : ''}`}
           src={value}
           alt="Preview"
+          style={previewSize ? { width: previewSize, height: previewSize, objectFit: 'contain' } : undefined}
         />
       )}
     </div>
@@ -1196,8 +1383,8 @@ function StatsEditor({
       {config.stats.map((item, index) => (
         <div className="repeat-card" key={index}>
           <div className="admin-grid two">
-            <Field label="Value" value={item.value} onChange={v => update(c => (c.stats[index].value = v))} />
-            <Field label="Label" value={item.label} onChange={v => update(c => (c.stats[index].label = v))} />
+            <Field label="Value" value={item.value} onChange={v => update(c => (c.stats[index].value = v))} translationKey={`stats.${index}.value`} />
+            <Field label="Label" value={item.label} onChange={v => update(c => (c.stats[index].label = v))} translationKey={`stats.${index}.label`} />
           </div>
           <DeleteButton onClick={() => update(c => c.stats.splice(index, 1))} />
         </div>
@@ -1210,22 +1397,30 @@ function StatsEditor({
 function StepsEditor({
   config,
   update,
+  pickImage,
 }: {
   config: SiteConfig
   update: (f: (c: SiteConfig) => void) => void
+  pickImage: (target: ImageTarget) => void
 }) {
   return (
-    <Panel title="How it works" description="Edit the steps, titles, descriptions and icons.">
+    <Panel title="How it works" description="Edit the steps, titles, descriptions and 64×64 image icons.">
       <SectionAppearanceEditor config={config} update={update} sectionType="steps" />
       {config.steps.map((item, index) => (
         <div className="repeat-card" key={index}>
-          <Field label="Icon / number" value={item.icon} onChange={v => update(c => (c.steps[index].icon = v))} />
-          <Field label="Title" value={item.title} onChange={v => update(c => (c.steps[index].title = v))} />
-          <Field label="Description" value={item.body} onChange={v => update(c => (c.steps[index].body = v))} multiline />
+          <ImageEditor
+            label={`Step ${index + 1} icon · 64×64 recommended`}
+            value={item.icon}
+            onChange={v => update(c => (c.steps[index].icon = v))}
+            onUpload={() => pickImage({ kind: 'step', index })}
+            previewSize={64}
+          />
+          <Field label="Title" value={item.title} onChange={v => update(c => (c.steps[index].title = v))} translationKey={`steps.${index}.title`} />
+          <Field label="Description" value={item.body} onChange={v => update(c => (c.steps[index].body = v))} multiline translationKey={`steps.${index}.body`} />
           <DeleteButton onClick={() => update(c => c.steps.splice(index, 1))} />
         </div>
       ))}
-      <AddButton onClick={() => update(c => c.steps.push({ icon: String(c.steps.length + 1).padStart(2, '0'), title: 'New step', body: 'Describe this step.' }))}>Add step</AddButton>
+      <AddButton onClick={() => update(c => c.steps.push({ icon: '', title: 'New step', body: 'Describe this step.' }))}>Add step</AddButton>
     </Panel>
   )
 }
@@ -1243,10 +1438,10 @@ function TickerEditor({
       {config.findings.map((item, index) => (
         <div className="repeat-card" key={index}>
           <div className="admin-grid two">
-            <Field label="Category" value={item.category} onChange={v => update(c => (c.findings[index].category = v))} />
-            <Field label="Status text" value={item.statusText} onChange={v => update(c => (c.findings[index].statusText = v))} />
+            <Field label="Category" value={item.category} onChange={v => update(c => (c.findings[index].category = v))} translationKey={`findings.${index}.category`} />
+            <Field label="Status text" value={item.statusText} onChange={v => update(c => (c.findings[index].statusText = v))} translationKey={`findings.${index}.statusText`} />
           </div>
-          <Field label="Finding" value={item.finding} onChange={v => update(c => (c.findings[index].finding = v))} />
+          <Field label="Finding" value={item.finding} onChange={v => update(c => (c.findings[index].finding = v))} translationKey={`findings.${index}.finding`} />
           <label className="admin-field">
             <span>Status</span>
             <select value={item.status} onChange={event => update(c => (c.findings[index].status = event.target.value as 'ok' | 'warn' | 'critical'))}>
@@ -1273,17 +1468,17 @@ function ReportEditor({
   return (
     <Panel title="Report preview" description="Edit the report heading and every metric displayed in the preview.">
       <SectionAppearanceEditor config={config} update={update} sectionType="report" />
-      <Field label="Title" value={config.report.title} onChange={v => update(c => (c.report.title = v))} />
+      <Field label="Title" value={config.report.title} onChange={v => update(c => (c.report.title = v))} translationKey="report.title" />
       <div className="admin-grid two">
-        <Field label="Store / company" value={config.report.store} onChange={v => update(c => (c.report.store = v))} />
-        <Field label="Category" value={config.report.category} onChange={v => update(c => (c.report.category = v))} />
+        <Field label="Store / company" value={config.report.store} onChange={v => update(c => (c.report.store = v))} translationKey="report.store" />
+        <Field label="Category" value={config.report.category} onChange={v => update(c => (c.report.category = v))} translationKey="report.category" />
       </div>
       <h3 className="subheading">Metrics</h3>
       {config.report.metrics.map((metric, index) => (
         <div className="repeat-card" key={index}>
           <div className="admin-grid two">
-            <Field label="Value" value={metric.value} onChange={v => update(c => (c.report.metrics[index].value = v))} />
-            <Field label="Label" value={metric.label} onChange={v => update(c => (c.report.metrics[index].label = v))} />
+            <Field label="Value" value={metric.value} onChange={v => update(c => (c.report.metrics[index].value = v))} translationKey={`report.metrics.${index}.value`} />
+            <Field label="Label" value={metric.label} onChange={v => update(c => (c.report.metrics[index].label = v))} translationKey={`report.metrics.${index}.label`} />
           </div>
           <DeleteButton onClick={() => update(c => c.report.metrics.splice(index, 1))} />
         </div>
@@ -1296,23 +1491,31 @@ function ReportEditor({
 function SegmentsEditor({
   config,
   update,
+  pickImage,
 }: {
   config: SiteConfig
   update: (f: (c: SiteConfig) => void) => void
+  pickImage: (target: ImageTarget) => void
 }) {
   return (
-    <Panel title="Who it's for" description="Edit audience cards and their bullet points.">
+    <Panel title="Who it's for" description="Edit audience cards and their 64×64 image icons and bullet points.">
       <SectionAppearanceEditor config={config} update={update} sectionType="segments" />
       {config.segments.map((item, index) => (
         <div className="repeat-card" key={index}>
-          <Field label="Icon (emoji / text)" value={item.icon || ''} placeholder="e.g. 🚀" onChange={v => update(c => (c.segments[index].icon = v))} />
-          <Field label="Title" value={item.title} onChange={v => update(c => (c.segments[index].title = v))} />
-          <Field label="Description" value={item.description} onChange={v => update(c => (c.segments[index].description = v))} multiline />
-          <Field label="Bullets (one per line)" value={item.bullets.join('\n')} onChange={v => update(c => (c.segments[index].bullets = v.split('\n').filter(Boolean)))} multiline />
+          <ImageEditor
+            label={`Audience ${index + 1} icon · 64×64 recommended`}
+            value={item.icon || ''}
+            onChange={v => update(c => (c.segments[index].icon = v))}
+            onUpload={() => pickImage({ kind: 'segment', index })}
+            previewSize={64}
+          />
+          <Field label="Title" value={item.title} onChange={v => update(c => (c.segments[index].title = v))} translationKey={`segments.${index}.title`} />
+          <Field label="Description" value={item.description} onChange={v => update(c => (c.segments[index].description = v))} multiline translationKey={`segments.${index}.description`} />
+          <Field label="Bullets (one per line)" value={item.bullets.join('\n')} onChange={v => update(c => (c.segments[index].bullets = v.split('\n').filter(Boolean)))} multiline translationKey={`segments.${index}.bullets`} />
           <DeleteButton onClick={() => update(c => c.segments.splice(index, 1))} />
         </div>
       ))}
-      <AddButton onClick={() => update(c => c.segments.push({ title: 'New audience', description: 'Describe this audience.', bullets: ['Benefit one', 'Benefit two'], icon: '✦' }))}>Add audience</AddButton>
+      <AddButton onClick={() => update(c => c.segments.push({ title: 'New audience', description: 'Describe this audience.', bullets: ['Benefit one', 'Benefit two'], icon: '' }))}>Add audience</AddButton>
     </Panel>
   )
 }
@@ -1331,9 +1534,9 @@ function BlocksEditor({
       <SectionAppearanceEditor config={config} update={update} sectionType="blocks" />
       {config.blocks.map((item, index) => (
         <div className="repeat-card" key={index}>
-          <Field label="Eyebrow" value={item.eyebrow} onChange={v => update(c => (c.blocks[index].eyebrow = v))} />
-          <Field label="Title" value={item.title} onChange={v => update(c => (c.blocks[index].title = v))} />
-          <Field label="Body" value={item.body} onChange={v => update(c => (c.blocks[index].body = v))} multiline />
+          <Field label="Eyebrow" value={item.eyebrow} onChange={v => update(c => (c.blocks[index].eyebrow = v))} translationKey={`blocks.${index}.eyebrow`} />
+          <Field label="Title" value={item.title} onChange={v => update(c => (c.blocks[index].title = v))} translationKey={`blocks.${index}.title`} />
+          <Field label="Body" value={item.body} onChange={v => update(c => (c.blocks[index].body = v))} multiline translationKey={`blocks.${index}.body`} />
           <div className="admin-grid two">
             <label className="admin-field">
               <span>Layout</span>
@@ -1352,7 +1555,7 @@ function BlocksEditor({
               </select>
             </label>
           </div>
-          <ImageEditor label={`Block ${index + 1} image`} value={item.image} onChange={v => update(c => (c.blocks[index].image = v))} onUpload={() => pickImage(index)} />
+          <ImageEditor label={`Block ${index + 1} image`} value={item.image} onChange={v => update(c => (c.blocks[index].image = v))} onUpload={() => pickImage({ kind: 'block', index })} />
           <DeleteButton onClick={() => update(c => c.blocks.splice(index, 1))} />
         </div>
       ))}
@@ -1396,13 +1599,14 @@ function ArticleSectionEditor({
   return (
     <Panel title={kind === 'articles' ? 'Insights' : 'News'} description="Edit the section, effect and card visuals.">
       <SectionAppearanceEditor config={config} update={update} sectionType={kind} />
-      <Field label="Heading" value={section.heading} onChange={v => update(c => (c[kind].heading = v))} />
-      <Field label="Subtitle" value={section.subtitle} onChange={v => update(c => (c[kind].subtitle = v))} multiline />
+      <Field label="Heading" value={section.heading} onChange={v => update(c => (c[kind].heading = v))} translationKey={`${kind}.heading`} />
+      <Field label="Subtitle" value={section.subtitle} onChange={v => update(c => (c[kind].subtitle = v))} multiline translationKey={`${kind}.subtitle`} />
       <Field
         label="View all link target"
         value={section.viewAllHref}
         placeholder="/articles, #articles or https://..."
         onChange={v => update(c => (c[kind].viewAllHref = v))}
+        translate={false}
       />
       <EffectSelect value={effect} onChange={v => update(c => (c[kind].effect = v))} />
 
@@ -1414,12 +1618,12 @@ function ArticleSectionEditor({
 
       {section.items.map((item, index) => (
         <div className="repeat-card" key={index}>
-          <Field label="Title" value={item.title} onChange={v => update(c => (c[kind].items[index].title = v))} />
+          <Field label="Title" value={item.title} onChange={v => update(c => (c[kind].items[index].title = v))} translationKey={`${kind}.items.${index}.title`} />
           <div className="admin-grid two">
-            <Field label="Category" value={item.category} onChange={v => update(c => (c[kind].items[index].category = v))} />
-            <Field label="Date" value={item.date} onChange={v => update(c => (c[kind].items[index].date = v))} />
+            <Field label="Category" value={item.category} onChange={v => update(c => (c[kind].items[index].category = v))} translationKey={`${kind}.items.${index}.category`} />
+            <Field label="Date" value={item.date} onChange={v => update(c => (c[kind].items[index].date = v))} translationKey={`${kind}.items.${index}.date`} />
           </div>
-          <Field label="Excerpt" value={item.excerpt} onChange={v => update(c => (c[kind].items[index].excerpt = v))} multiline />
+          <Field label="Excerpt" value={item.excerpt} onChange={v => update(c => (c[kind].items[index].excerpt = v))} multiline translationKey={`${kind}.items.${index}.excerpt`} />
           <DeleteButton onClick={() => update(c => c[kind].items.splice(index, 1))} />
         </div>
       ))}
@@ -1441,13 +1645,14 @@ function PeopleEditor({
   return (
     <Panel title="Network" description="Control the Network section, effect, card visuals and appearance.">
       <SectionAppearanceEditor config={config} update={update} sectionType="people" />
-      <Field label="Heading" value={config.people.heading} onChange={v => update(c => (c.people.heading = v))} />
-      <Field label="Subtitle" value={config.people.subtitle} onChange={v => update(c => (c.people.subtitle = v))} multiline />
+      <Field label="Heading" value={config.people.heading} onChange={v => update(c => (c.people.heading = v))} translationKey="people.heading" />
+      <Field label="Subtitle" value={config.people.subtitle} onChange={v => update(c => (c.people.subtitle = v))} multiline translationKey="people.subtitle" />
       <Field
         label="Network page target"
         value={config.people.pageHref}
         placeholder="/network, #cta or https://..."
         onChange={v => update(c => (c.people.pageHref = v))}
+        translate={false}
       />
       <EffectSelect value={effect} onChange={v => update(c => (c.people.effect = v))} />
       <CardStyleEditor
@@ -1459,11 +1664,11 @@ function PeopleEditor({
       {config.people.items.map((item, index) => (
         <div className="repeat-card" key={index}>
           <div className="admin-grid two">
-            <Field label="Name" value={item.name} onChange={v => update(c => (c.people.items[index].name = v))} />
-            <Field label="Role" value={item.role} onChange={v => update(c => (c.people.items[index].role = v))} />
+            <Field label="Name" value={item.name} onChange={v => update(c => (c.people.items[index].name = v))} translationKey={`people.items.${index}.name`} />
+            <Field label="Role" value={item.role} onChange={v => update(c => (c.people.items[index].role = v))} translationKey={`people.items.${index}.role`} />
           </div>
-          <Field label="Region" value={item.region} onChange={v => update(c => (c.people.items[index].region = v))} />
-          <Field label="Bio" value={item.bio} onChange={v => update(c => (c.people.items[index].bio = v))} multiline />
+          <Field label="Region" value={item.region} onChange={v => update(c => (c.people.items[index].region = v))} translationKey={`people.items.${index}.region`} />
+          <Field label="Bio" value={item.bio} onChange={v => update(c => (c.people.items[index].bio = v))} multiline translationKey={`people.items.${index}.bio`} />
           <DeleteButton onClick={() => update(c => c.people.items.splice(index, 1))} />
         </div>
       ))}
@@ -1485,13 +1690,13 @@ function PhilosophyEditor({
   return (
     <Panel title="The Shelvion Principle" description="Edit the principle heading, statement lines and supporting text.">
       <SectionAppearanceEditor config={config} update={update} sectionType="philosophy" />
-      <Field label="Eyebrow" value={config.philosophy.eyebrow || 'the shelvion principle'} onChange={v => update(c => (c.philosophy.eyebrow = v))} />
-      <Field label="Title" value={config.philosophy.title} onChange={v => update(c => (c.philosophy.title = v))} />
+      <Field label="Eyebrow" value={config.philosophy.eyebrow || 'the shelvion principle'} onChange={v => update(c => (c.philosophy.eyebrow = v))} translationKey="philosophy.eyebrow" />
+      <Field label="Title" value={config.philosophy.title} onChange={v => update(c => (c.philosophy.title = v))} translationKey="philosophy.title" />
 
       <h3 className="subheading">Principle lines</h3>
       {lines.map((line, index) => (
         <div className="repeat-card" key={index}>
-          <Field label={`Line ${index + 1}`} value={line.text} onChange={v => update(c => (c.philosophy.lines[index].text = v))} />
+          <Field label={`Line ${index + 1}`} value={line.text} onChange={v => update(c => (c.philosophy.lines[index].text = v))} translationKey={`philosophy.lines.${index}.text`} />
           <label className="admin-field inline-check">
             <input type="checkbox" checked={line.highlighted} onChange={event => update(c => (c.philosophy.lines[index].highlighted = event.target.checked))} />
             <span>Highlight this line</span>
@@ -1500,7 +1705,7 @@ function PhilosophyEditor({
         </div>
       ))}
       <AddButton onClick={() => update(c => c.philosophy.lines.push({ text: 'New principle line', highlighted: false }))}>Add principle line</AddButton>
-      <Field label="Body" value={config.philosophy.body} onChange={v => update(c => (c.philosophy.body = v))} multiline />
+      <Field label="Body" value={config.philosophy.body} onChange={v => update(c => (c.philosophy.body = v))} multiline translationKey="philosophy.body" />
     </Panel>
   )
 }
@@ -1515,9 +1720,9 @@ function CtaEditor({
   return (
     <Panel title="Call to action" description="Edit the final conversion section.">
       <SectionAppearanceEditor config={config} update={update} sectionType="cta" />
-      <Field label="Title" value={config.cta.title} onChange={v => update(c => (c.cta.title = v))} />
-      <Field label="Body" value={config.cta.body} onChange={v => update(c => (c.cta.body = v))} multiline />
-      <Field label="Button" value={config.cta.button} onChange={v => update(c => (c.cta.button = v))} />
+      <Field label="Title" value={config.cta.title} onChange={v => update(c => (c.cta.title = v))} translationKey="cta.title" />
+      <Field label="Body" value={config.cta.body} onChange={v => update(c => (c.cta.body = v))} multiline translationKey="cta.body" />
+      <Field label="Button" value={config.cta.button} onChange={v => update(c => (c.cta.button = v))} translationKey="cta.button" />
     </Panel>
   )
 }
@@ -1532,7 +1737,7 @@ function FooterEditor({
   return (
     <Panel title="Footer" description="Edit footer text and appearance.">
       <SectionAppearanceEditor config={config} update={update} sectionType="footer" />
-      <Field label="Footer text" value={config.footer} onChange={v => update(c => (c.footer = v))} multiline />
+      <Field label="Footer text" value={config.footer} onChange={v => update(c => (c.footer = v))} multiline translationKey="footer" />
     </Panel>
   )
 }

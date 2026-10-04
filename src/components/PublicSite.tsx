@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import type {
   CardStyle,
   EffectType,
+  HeroBrandCalibration,
   MenuVariant,
   SectionType,
   SiteConfig,
@@ -16,6 +17,20 @@ const EFFECTS: EffectType[] = [
   'rec_move_2x',
   'circle_move_left',
 ]
+
+type Translator = (key: string, fallback: string) => string
+
+const translate = (
+  config: SiteConfig,
+  language: string,
+  key: string,
+  fallback: string,
+) => {
+  if (language === (config.header.language.defaultLanguage || language)) {
+    return fallback
+  }
+  return config.translations?.[key]?.[language] ?? fallback
+}
 
 const shadowValue = (shadow: CardStyle['shadow']) => {
   if (shadow === 'strong') return '0 24px 60px rgba(0,0,0,.20)'
@@ -60,6 +75,9 @@ export function PublicSite({
     }
   }, [config.header.language.defaultLanguage, config.header.language.options, language])
 
+  const t: Translator = (key, fallback) =>
+    translate(config, language, key, fallback)
+
   const enabled = (id: string) =>
     config.sections.find(section => section.id === id)?.enabled
 
@@ -90,8 +108,25 @@ export function PublicSite({
   )
 
   const footerAppearance = sectionConfig('footer')?.appearance
-  const headerColor = config.theme.headerFooter || footerAppearance?.backgroundColor || '#231F20'
+  const headerColor =
+    config.theme.headerFooter ||
+    footerAppearance?.backgroundColor ||
+    '#231F20'
   const headerTextColor = footerAppearance?.fontColor || '#FFFFFF'
+
+  const localizedBrands: HeroBrandCalibration[] = (config.hero.calibration ?? []).map(
+    (brand, brandIndex) => ({
+      ...brand,
+      name: t(`hero.calibration.${brandIndex}.name`, brand.name),
+      products: brand.products.map((product, productIndex) => ({
+        ...product,
+        variant: t(
+          `hero.calibration.${brandIndex}.products.${productIndex}.variant`,
+          product.variant,
+        ),
+      })),
+    }),
+  )
 
   const renderMenuLink = (
     item: {
@@ -120,7 +155,10 @@ export function PublicSite({
   ) =>
     renderMenuLink(
       {
-        label: section.menu.label || section.label,
+        label: t(
+          `sections.${section.id}.menu.label`,
+          section.menu.label || section.label,
+        ),
         href: `#${section.id}`,
         variant: section.menu.variant,
       },
@@ -144,10 +182,10 @@ export function PublicSite({
             <img
               className="brand-logo"
               src={config.brand.logo}
-              alt={config.brand.name}
+              alt={t('brand.name', config.brand.name)}
             />
           ) : (
-            config.brand.name
+            t('brand.name', config.brand.name)
           )}
         </a>
 
@@ -161,7 +199,7 @@ export function PublicSite({
 
             {config.header.login.enabled &&
               renderMenuLink({
-                label: config.header.login.label,
+                label: t('header.login.label', config.header.login.label),
                 href: config.header.login.href,
                 variant: config.header.login.variant,
               })}
@@ -195,9 +233,7 @@ export function PublicSite({
         </div>
 
         <button
-          className={`mobile-menu-toggle ${
-            mobileMenuOpen ? 'open' : ''
-          }`}
+          className={`mobile-menu-toggle ${mobileMenuOpen ? 'open' : ''}`}
           type="button"
           aria-label="Toggle menu"
           aria-expanded={mobileMenuOpen}
@@ -211,21 +247,19 @@ export function PublicSite({
         {mobileMenuOpen && (
           <div className="mobile-menu">
             <div className="mobile-menu-list">
-              {[...normalMenuItems, ...bottomMenuItems].map(
-                section => (
-                  <span key={section.id}>
-                    {renderSectionMenuItem(section, true, () =>
-                      setMobileMenuOpen(false),
-                    )}
-                  </span>
-                ),
-              )}
+              {[...normalMenuItems, ...bottomMenuItems].map(section => (
+                <span key={section.id}>
+                  {renderSectionMenuItem(section, true, () =>
+                    setMobileMenuOpen(false),
+                  )}
+                </span>
+              ))}
 
               {config.header.login.enabled && (
                 <span>
                   {renderMenuLink(
                     {
-                      label: config.header.login.label,
+                      label: t('header.login.label', config.header.login.label),
                       href: config.header.login.href,
                       variant: config.header.login.variant,
                     },
@@ -272,24 +306,37 @@ export function PublicSite({
               } as CSSProperties
             }
           >
-            <span className="eyebrow">{config.hero.eyebrow}</span>
-            <h1>{config.hero.title}</h1>
-            <p>{config.hero.subtitle}</p>
+            <span className="eyebrow">{t('hero.eyebrow', config.hero.eyebrow)}</span>
+            <h1>{t('hero.title', config.hero.title)}</h1>
+            <p>{t('hero.subtitle', config.hero.subtitle)}</p>
 
             <div className="buttons">
-              <a className="primary" href="#cta">
-                {config.hero.primaryCta}
-              </a>
-              <a className="outline" href="#steps">
-                {config.hero.secondaryCta}
-              </a>
+              {config.hero.primaryButton.enabled && (
+                <a
+                  className="primary"
+                  href={config.hero.primaryButton.href || '#cta'}
+                >
+                  {t('hero.primaryButton.label', config.hero.primaryButton.label)}
+                </a>
+              )}
+              {config.hero.secondaryButton.enabled && (
+                <a
+                  className="outline"
+                  href={config.hero.secondaryButton.href || '#steps'}
+                >
+                  {t(
+                    'hero.secondaryButton.label',
+                    config.hero.secondaryButton.label,
+                  )}
+                </a>
+              )}
             </div>
           </div>
 
           {config.hero.image ? (
             <HeroShelfAudit
               image={config.hero.image}
-              brands={config.hero.calibration ?? []}
+              brands={localizedBrands}
               imageSize={heroSize(config.hero.imageSize)}
             />
           ) : (
@@ -309,10 +356,10 @@ export function PublicSite({
           className="stats cms-section"
           style={sectionStyle('stats')}
         >
-          {config.stats.map(stat => (
-            <div key={stat.label}>
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
+          {config.stats.map((stat, index) => (
+            <div key={stat.label + index}>
+              <strong>{t(`stats.${index}.value`, stat.value)}</strong>
+              <span>{t(`stats.${index}.label`, stat.label)}</span>
             </div>
           ))}
         </section>
@@ -326,11 +373,19 @@ export function PublicSite({
         >
           <Header eyebrow="The process" title="Three steps. Zero friction." />
           <div className="stepgrid">
-            {config.steps.map(step => (
-              <article className="card" key={step.title}>
-                <b>{step.icon}</b>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
+            {config.steps.map((step, index) => (
+              <article className="card" key={index}>
+                {step.icon ? (
+                  <img
+                    className="section-card-icon"
+                    src={step.icon}
+                    alt=""
+                    width={64}
+                    height={64}
+                  />
+                ) : null}
+                <h3>{t(`steps.${index}.title`, step.title)}</h3>
+                <p>{t(`steps.${index}.body`, step.body)}</p>
               </article>
             ))}
           </div>
@@ -343,11 +398,13 @@ export function PublicSite({
           className="ticker cms-section"
           style={sectionStyle('ticker')}
         >
-          {config.findings.map(finding => (
-            <div key={finding.finding}>
-              <small>{finding.category}</small>
-              <span>{finding.finding}</span>
-              <em className={finding.status}>{finding.statusText}</em>
+          {config.findings.map((finding, index) => (
+            <div key={finding.finding + index}>
+              <small>{t(`findings.${index}.category`, finding.category)}</small>
+              <span>{t(`findings.${index}.finding`, finding.finding)}</span>
+              <em className={finding.status}>
+                {t(`findings.${index}.statusText`, finding.statusText)}
+              </em>
             </div>
           ))}
         </section>
@@ -359,15 +416,15 @@ export function PublicSite({
           className="section soft cms-section"
           style={sectionStyle('report')}
         >
-          <Header eyebrow="Preview" title={config.report.title} />
+          <Header eyebrow="Preview" title={t('report.title', config.report.title)} />
           <div className="report">
-            <h3>{config.report.store}</h3>
-            <p>{config.report.category}</p>
+            <h3>{t('report.store', config.report.store)}</h3>
+            <p>{t('report.category', config.report.category)}</p>
             <div className="metrics">
-              {config.report.metrics.map(metric => (
-                <div key={metric.label}>
-                  <strong>{metric.value}</strong>
-                  <span>{metric.label}</span>
+              {config.report.metrics.map((metric, index) => (
+                <div key={metric.label + index}>
+                  <strong>{t(`report.metrics.${index}.value`, metric.value)}</strong>
+                  <span>{t(`report.metrics.${index}.label`, metric.label)}</span>
                 </div>
               ))}
             </div>
@@ -386,17 +443,29 @@ export function PublicSite({
             title="Built for different kinds of teams."
           />
           <div className="three">
-            {config.segments.map(segment => (
-              <article className="card segment-card" key={segment.title}>
-                <div className="segment-icon" aria-hidden="true">
-                  {segment.icon || '✦'}
-                </div>
-                <h3>{segment.title}</h3>
-                <p>{segment.description}</p>
+            {config.segments.map((segment, index) => (
+              <article className="card segment-card" key={index}>
+                {segment.icon ? (
+                  <img
+                    className="section-card-icon"
+                    src={segment.icon}
+                    alt=""
+                    width={64}
+                    height={64}
+                  />
+                ) : null}
+                <h3>{t(`segments.${index}.title`, segment.title)}</h3>
+                <p>{t(`segments.${index}.description`, segment.description)}</p>
                 <ul>
-                  {segment.bullets.map(bullet => (
-                    <li key={bullet}>{bullet}</li>
-                  ))}
+                  {t(
+                    `segments.${index}.bullets`,
+                    segment.bullets.join('\n'),
+                  )
+                    .split('\n')
+                    .filter(Boolean)
+                    .map((bullet, bulletIndex) => (
+                      <li key={bulletIndex}>{bullet}</li>
+                    ))}
                 </ul>
               </article>
             ))}
@@ -414,8 +483,13 @@ export function PublicSite({
           >
             <div className={`blockgrid ${block.layout}`}>
               <div>
-                <Header eyebrow={block.eyebrow} title={block.title} />
-                <p className="lead">{block.body}</p>
+                <Header
+                  eyebrow={t(`blocks.${index}.eyebrow`, block.eyebrow)}
+                  title={t(`blocks.${index}.title`, block.title)}
+                />
+                <p className="lead">
+                  {t(`blocks.${index}.body`, block.body)}
+                </p>
               </div>
               {block.layout !== 'none' && (
                 <div className="visual">
@@ -436,6 +510,7 @@ export function PublicSite({
           eyebrow="Insights"
           config={config.articles}
           sectionStyle={sectionStyle('articles')}
+          t={t}
         />
       )}
 
@@ -445,6 +520,7 @@ export function PublicSite({
           eyebrow="Updates"
           config={config.news}
           sectionStyle={sectionStyle('news')}
+          t={t}
         />
       )}
 
@@ -452,6 +528,7 @@ export function PublicSite({
         <NetworkSection
           config={config.people}
           sectionStyle={sectionStyle('people')}
+          t={t}
         />
       )}
 
@@ -459,6 +536,7 @@ export function PublicSite({
         <PrincipleSection
           config={config.philosophy}
           sectionStyle={sectionStyle('philosophy')}
+          t={t}
         />
       )}
 
@@ -469,9 +547,9 @@ export function PublicSite({
           style={sectionStyle('cta')}
         >
           <div>
-            <h2>{config.cta.title}</h2>
-            <p>{config.cta.body}</p>
-            <button onClick={onAdmin}>{config.cta.button}</button>
+            <h2>{t('cta.title', config.cta.title)}</h2>
+            <p>{t('cta.body', config.cta.body)}</p>
+            <button onClick={onAdmin}>{t('cta.button', config.cta.button)}</button>
           </div>
         </section>
       )}
@@ -482,7 +560,7 @@ export function PublicSite({
           className="cms-section"
           style={sectionStyle('footer')}
         >
-          {config.footer}
+          {t('footer', config.footer)}
           <button onClick={onAdmin}>Admin</button>
         </footer>
       )}
@@ -514,14 +592,27 @@ function EffectRail({
   effect,
   dark,
   cardStyle,
+  t,
+  kind,
 }: {
   items: SiteConfig['articles']['items']
   effect: EffectType
   dark?: boolean
   cardStyle: CardStyle
+  t: Translator
+  kind: 'articles' | 'news'
 }) {
   const safe = EFFECTS.includes(effect) ? effect : 'rec_move_left'
   const doubled = [...items, ...items]
+
+  const textFor = (
+    article: SiteConfig['articles']['items'][number],
+    fallback: string,
+    field: 'title' | 'category' | 'excerpt' | 'date',
+  ) => {
+    const index = items.indexOf(article)
+    return t(`${kind}.items.${Math.max(0, index)}.${field}`, fallback)
+  }
 
   if (safe === 'card effect') {
     return (
@@ -536,10 +627,10 @@ function EffectRail({
             key={article.title + '-' + index}
             style={cardStyleVars(cardStyle)}
           >
-            <small>{article.category}</small>
-            <h3>{article.title}</h3>
-            <p>{article.excerpt}</p>
-            <span>{article.date} · Read →</span>
+            <small>{textFor(article, article.category, 'category')}</small>
+            <h3>{textFor(article, article.title, 'title')}</h3>
+            <p>{textFor(article, article.excerpt, 'excerpt')}</p>
+            <span>{textFor(article, article.date, 'date')} · Read →</span>
           </article>
         ))}
       </div>
@@ -561,10 +652,14 @@ function EffectRail({
               style={cardStyleVars(cardStyle)}
             >
               <div className="article-circle-badge">
-                {article.category}
+                {textFor(article, article.category, 'category')}
               </div>
-              <div className="network-name">{article.title}</div>
-              <div className="network-region">{article.date}</div>
+              <div className="network-name">
+                {textFor(article, article.title, 'title')}
+              </div>
+              <div className="network-region">
+                {textFor(article, article.date, 'date')}
+              </div>
             </div>
           ))}
         </div>
@@ -577,15 +672,21 @@ function EffectRail({
       <div className="marquee-stack">
         <MarqueeRow
           items={doubled}
+          sourceItems={items}
           direction="left"
           dark={dark}
           cardStyle={cardStyle}
+          t={t}
+          kind={kind}
         />
         <MarqueeRow
           items={[...items.slice().reverse(), ...items.slice().reverse()]}
+          sourceItems={items}
           direction="right"
           dark={dark}
           cardStyle={cardStyle}
+          t={t}
+          kind={kind}
         />
       </div>
     )
@@ -594,23 +695,32 @@ function EffectRail({
   return (
     <MarqueeRow
       items={doubled}
+      sourceItems={items}
       direction="left"
       dark={dark}
       cardStyle={cardStyle}
+      t={t}
+      kind={kind}
     />
   )
 }
 
 function MarqueeRow({
   items,
+  sourceItems,
   direction,
   dark,
   cardStyle,
+  t,
+  kind,
 }: {
   items: SiteConfig['articles']['items']
+  sourceItems: SiteConfig['articles']['items']
   direction: 'left' | 'right'
   dark?: boolean
   cardStyle: CardStyle
+  t: Translator
+  kind: 'articles' | 'news'
 }) {
   return (
     <div className="marquee-mask">
@@ -621,18 +731,22 @@ function MarqueeRow({
           (direction === 'right' ? 'move-right' : 'move-left')
         }
       >
-        {items.map((article, index) => (
-          <article
-            className="marquee-card"
-            key={article.title + '-' + index}
-            style={cardStyleVars(cardStyle)}
-          >
-            <small>{article.category}</small>
-            <h3>{article.title}</h3>
-            <p>{article.excerpt}</p>
-            <span>{article.date} · Read →</span>
-          </article>
-        ))}
+        {items.map((article, index) => {
+          const sourceIndex = sourceItems.indexOf(article)
+          const safeIndex = sourceIndex < 0 ? index % Math.max(1, sourceItems.length) : sourceIndex
+          return (
+            <article
+              className="marquee-card"
+              key={article.title + '-' + index}
+              style={cardStyleVars(cardStyle)}
+            >
+              <small>{t(`${kind}.items.${safeIndex}.category`, article.category)}</small>
+              <h3>{t(`${kind}.items.${safeIndex}.title`, article.title)}</h3>
+              <p>{t(`${kind}.items.${safeIndex}.excerpt`, article.excerpt)}</p>
+              <span>{t(`${kind}.items.${safeIndex}.date`, article.date)} · Read →</span>
+            </article>
+          )
+        })}
       </div>
     </div>
   )
@@ -643,11 +757,13 @@ function ArticleCollection({
   eyebrow,
   config,
   sectionStyle,
+  t,
 }: {
   id: 'articles' | 'news'
   eyebrow: string
   config: SiteConfig['articles'] | SiteConfig['news']
   sectionStyle: CSSProperties
+  t: Translator
 }) {
   const dark = id === 'news'
 
@@ -661,8 +777,11 @@ function ArticleCollection({
     >
       <div className="collection-head">
         <div>
-          <Header eyebrow={eyebrow} title={config.heading} />
-          <p className="lead">{config.subtitle}</p>
+          <Header
+            eyebrow={eyebrow}
+            title={t(`${id}.heading`, config.heading)}
+          />
+          <p className="lead">{t(`${id}.subtitle`, config.subtitle)}</p>
         </div>
         <a
           className="collection-link"
@@ -677,6 +796,8 @@ function ArticleCollection({
         effect={config.effect || 'rec_move_left'}
         dark={dark}
         cardStyle={config.cardStyle}
+        t={t}
+        kind={id}
       />
     </section>
   )
@@ -685,9 +806,11 @@ function ArticleCollection({
 function NetworkSection({
   config,
   sectionStyle,
+  t,
 }: {
   config: SiteConfig['people']
   sectionStyle: CSSProperties
+  t: Translator
 }) {
   const effect = config.effect || 'card effect'
 
@@ -702,8 +825,11 @@ function NetworkSection({
       >
         <div className="collection-head">
           <div>
-            <Header eyebrow="Our network" title={config.heading} />
-            <p className="lead">{config.subtitle}</p>
+            <Header
+              eyebrow="Our network"
+              title={t('people.heading', config.heading)}
+            />
+            <p className="lead">{t('people.subtitle', config.subtitle)}</p>
           </div>
           <a className="collection-link" href={config.pageHref || '#cta'}>
             network page
@@ -712,23 +838,32 @@ function NetworkSection({
 
         <div className="network-circle-mask">
           <div className="network-circle-track">
-            {items.map((person, index) => (
-              <div
-                className="network-circle"
-                key={person.name + '-' + index}
-                style={cardStyleVars(config.cardStyle)}
-              >
-                <div className="network-avatar">
-                  {person.name
-                    .split(' ')
-                    .map(part => part[0])
-                    .join('')}
+            {items.map((person, index) => {
+              const sourceIndex = index % Math.max(1, config.items.length)
+              return (
+                <div
+                  className="network-circle"
+                  key={person.name + '-' + index}
+                  style={cardStyleVars(config.cardStyle)}
+                >
+                  <div className="network-avatar">
+                    {t(`people.items.${sourceIndex}.name`, person.name)
+                      .split(' ')
+                      .map(part => part[0])
+                      .join('')}
+                  </div>
+                  <div className="network-name">
+                    {t(`people.items.${sourceIndex}.name`, person.name)}
+                  </div>
+                  <div className="network-role">
+                    {t(`people.items.${sourceIndex}.role`, person.role)}
+                  </div>
+                  <div className="network-region">
+                    {t(`people.items.${sourceIndex}.region`, person.region)}
+                  </div>
                 </div>
-                <div className="network-name">{person.name}</div>
-                <div className="network-role">{person.role}</div>
-                <div className="network-region">{person.region}</div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -743,8 +878,11 @@ function NetworkSection({
     >
       <div className="collection-head">
         <div>
-          <Header eyebrow="Our network" title={config.heading} />
-          <p className="lead">{config.subtitle}</p>
+          <Header
+            eyebrow="Our network"
+            title={t('people.heading', config.heading)}
+          />
+          <p className="lead">{t('people.subtitle', config.subtitle)}</p>
         </div>
         <a className="collection-link" href={config.pageHref || '#cta'}>
           network page
@@ -755,7 +893,7 @@ function NetworkSection({
         {config.items.map((person, index) => (
           <article
             className="network-card"
-            key={person.name}
+            key={person.name + '-' + index}
             style={
               {
                 '--card-index': index,
@@ -767,10 +905,12 @@ function NetworkSection({
               {String(index + 1).padStart(2, '0')}
             </div>
             <div className="network-card-content">
-              <span className="network-region">{person.region}</span>
-              <h3>{person.name}</h3>
-              <strong>{person.role}</strong>
-              <p>{person.bio}</p>
+              <span className="network-region">
+                {t(`people.items.${index}.region`, person.region)}
+              </span>
+              <h3>{t(`people.items.${index}.name`, person.name)}</h3>
+              <strong>{t(`people.items.${index}.role`, person.role)}</strong>
+              <p>{t(`people.items.${index}.bio`, person.bio)}</p>
             </div>
           </article>
         ))}
@@ -782,9 +922,11 @@ function NetworkSection({
 function PrincipleSection({
   config,
   sectionStyle,
+  t,
 }: {
   config: SiteConfig['philosophy']
   sectionStyle: CSSProperties
+  t: Translator
 }) {
   const lines = config.lines?.length
     ? config.lines
@@ -802,9 +944,9 @@ function PrincipleSection({
     >
       <div className="principle-inner">
         <span className="eyebrow">
-          {config.eyebrow || 'the shelvion principle'}
+          {t('philosophy.eyebrow', config.eyebrow || 'the shelvion principle')}
         </span>
-        <h2>{config.title}</h2>
+        <h2>{t('philosophy.title', config.title)}</h2>
         <div className="principle-lines">
           {lines.map((line, index) => (
             <div
@@ -813,11 +955,11 @@ function PrincipleSection({
               }`}
               key={index}
             >
-              {line.text}
+              {t(`philosophy.lines.${index}.text`, line.text)}
             </div>
           ))}
         </div>
-        <p>{config.body}</p>
+        <p>{t('philosophy.body', config.body)}</p>
       </div>
     </section>
   )

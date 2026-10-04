@@ -4,6 +4,12 @@ export type MenuPlacement = 'normal' | 'bottom'
 export type MenuVariant = 'link' | 'button'
 export type CardShadow = 'none' | 'soft' | 'strong'
 
+/**
+ * Translation storage is keyed by a stable-ish content path and then by language code.
+ * The base value remains in the normal config field for the configured default language.
+ */
+export type TranslationMap = Record<string, Record<string, string>>
+
 export interface SectionAppearance {
   backgroundColor: string
   fontColor: string
@@ -61,6 +67,12 @@ export interface CardStyle {
   shadow: CardShadow
 }
 
+export interface HeroButton {
+  enabled: boolean
+  label: string
+  href: string
+}
+
 export interface HeaderLogin {
   enabled: boolean
   label: string
@@ -84,13 +96,17 @@ export interface SiteConfig {
   theme: { primary: string; secondary: string; ink: string; paper: string; grey: string; accent: string; dark: string; headerFooter: string }
   nav: { label: string; href: string }[]
   header: HeaderConfig
+  translations: TranslationMap
   sections: Section[]
   hero: {
     eyebrow: string
     title: string
     subtitle: string
-    primaryCta: string
-    secondaryCta: string
+    primaryButton: HeroButton
+    secondaryButton: HeroButton
+    /** Legacy string fields retained so older JSON can still be hydrated. */
+    primaryCta?: string
+    secondaryCta?: string
     image: string
     imageSize: number
     titleSize: number

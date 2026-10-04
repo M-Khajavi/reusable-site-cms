@@ -1,5 +1,20 @@
 import type { HeroBrandCalibration, SiteConfig } from '../types/site'
 
+const iconSvg = (content: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none"><rect x="1" y="1" width="62" height="62" rx="14" fill="#F7F9FA" stroke="#4ECACE" stroke-width="2"/>${content}</svg>`)}`
+
+const processIcons = [
+  iconSvg('<path d="M20 20h24v24H20z" stroke="#2575A7" stroke-width="3"/><path d="M24 28h16M24 35h16" stroke="#2575A7" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="32" r="3" fill="#FF5A36"/>'),
+  iconSvg('<circle cx="32" cy="32" r="16" stroke="#2575A7" stroke-width="3"/><path d="M32 23v10l7 4" stroke="#4ECACE" stroke-width="3" stroke-linecap="round"/>'),
+  iconSvg('<path d="M18 22h28v20H18z" stroke="#2575A7" stroke-width="3"/><path d="M24 46h16M32 42v4" stroke="#2575A7" stroke-width="3" stroke-linecap="round"/><path d="m24 31 5 5 11-12" stroke="#FF5A36" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'),
+]
+
+const audienceIcons = [
+  iconSvg('<path d="m32 17 5 10 11 1.6-8 7.8 1.9 11-9.9-5.2L23.1 47.4l1.9-11-8-7.8L28 27z" stroke="#2575A7" stroke-width="3" stroke-linejoin="round"/>'),
+  iconSvg('<circle cx="32" cy="32" r="14" stroke="#2575A7" stroke-width="3"/><path d="m39 25-4 8-10 6 4-8z" fill="#4ECACE" stroke="#2575A7" stroke-width="2" stroke-linejoin="round"/>'),
+  iconSvg('<rect x="20" y="22" width="24" height="20" rx="2" stroke="#2575A7" stroke-width="3"/><path d="M25 22v-4h14v4M25 30h14M25 36h9" stroke="#FF5A36" stroke-width="3" stroke-linecap="round"/>'),
+]
+
 const heroCalibration: HeroBrandCalibration[] = [
   {
     name: 'Paulig',
@@ -58,13 +73,22 @@ const defaultSectionAppearance = {
   footer: { backgroundColor: '#231F20', fontColor: '#FFFFFF' },
 } as const
 
-const section = (id: SiteConfig['sections'][number]['id'], type: SiteConfig['sections'][number]['type'], label: string) => ({
+const section = (
+  id: SiteConfig['sections'][number]['id'],
+  type: SiteConfig['sections'][number]['type'],
+  label: string,
+) => ({
   id,
   type,
   label,
   enabled: true,
   appearance: { ...defaultSectionAppearance[type] },
-  menu: { enabled: false, label, placement: 'normal' as const, variant: 'link' as const },
+  menu: {
+    enabled: false,
+    label,
+    placement: 'normal' as const,
+    variant: 'link' as const,
+  },
 })
 
 export const defaultConfig: SiteConfig = {
@@ -85,7 +109,6 @@ export const defaultConfig: SiteConfig = {
     headerFooter: '#231F20',
   },
 
-  /* Kept for backward compatibility. The public header now uses section menu settings. */
   nav: [],
 
   header: {
@@ -101,6 +124,8 @@ export const defaultConfig: SiteConfig = {
       defaultLanguage: 'EN',
     },
   },
+
+  translations: {},
 
   sections: [
     section('hero', 'hero', 'Hero'),
@@ -122,8 +147,16 @@ export const defaultConfig: SiteConfig = {
     eyebrow: 'Modern website · reusable template',
     title: 'Build a clear digital presence.',
     subtitle: 'A configurable website system with a public site and content admin. Change the content without rebuilding the components.',
-    primaryCta: 'Get started',
-    secondaryCta: 'See how it works',
+    primaryButton: {
+      enabled: true,
+      label: 'Get started',
+      href: '#cta',
+    },
+    secondaryButton: {
+      enabled: true,
+      label: 'See how it works',
+      href: '#steps',
+    },
     image: 'assets/hero-image-coffee.png',
     imageSize: 48,
     titleSize: 100,
@@ -140,9 +173,9 @@ export const defaultConfig: SiteConfig = {
   ],
 
   steps: [
-    { title: 'Configure the site', body: 'Change your brand, navigation, sections and content from the admin panel.', icon: '01' },
-    { title: 'Edit the content', body: 'Update headings, cards, articles, people and calls to action without touching JSX.', icon: '02' },
-    { title: 'Preview and publish', body: 'Preview the public website, save configuration locally, then connect a real backend later.', icon: '03' },
+    { title: 'Configure the site', body: 'Change your brand, navigation, sections and content from the admin panel.', icon: processIcons[0] },
+    { title: 'Edit the content', body: 'Update headings, cards, articles, people and calls to action without touching JSX.', icon: processIcons[1] },
+    { title: 'Preview and publish', body: 'Preview the public website, save configuration locally, then connect a real backend later.', icon: processIcons[2] },
   ],
 
   findings: [
@@ -163,9 +196,9 @@ export const defaultConfig: SiteConfig = {
   },
 
   segments: [
-    { title: 'Startups', description: 'Launch quickly with a polished structure.', bullets: ['Clear positioning', 'Reusable content blocks', 'Simple administration'], icon: '🚀' },
-    { title: 'Consultancies', description: 'Present expertise and services professionally.', bullets: ['Case-study friendly', 'Insights and news', 'Flexible CTAs'], icon: '🧭' },
-    { title: 'Product brands', description: 'Turn product information into a strong digital story.', bullets: ['Feature sections', 'Visual storytelling', 'Scalable content'], icon: '📦' },
+    { title: 'Startups', description: 'Launch quickly with a polished structure.', bullets: ['Clear positioning', 'Reusable content blocks', 'Simple administration'], icon: audienceIcons[0] },
+    { title: 'Consultancies', description: 'Present expertise and services professionally.', bullets: ['Case-study friendly', 'Insights and news', 'Flexible CTAs'], icon: audienceIcons[1] },
+    { title: 'Product brands', description: 'Turn product information into a strong digital story.', bullets: ['Feature sections', 'Visual storytelling', 'Scalable content'], icon: audienceIcons[2] },
   ],
 
   blocks: [
