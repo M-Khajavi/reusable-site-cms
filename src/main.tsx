@@ -20,6 +20,9 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
     savedFooterAppearance?.backgroundColor ||
     defaultConfig.theme.headerFooter
 
+  const legacyPrimaryLabel = raw.hero?.primaryCta || defaultConfig.hero.primaryButton.label
+  const legacySecondaryLabel = raw.hero?.secondaryCta || defaultConfig.hero.secondaryButton.label
+
   return {
     ...defaultConfig,
     ...raw,
@@ -43,6 +46,10 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
             : defaultConfig.header.language.options,
       },
     },
+    translations: {
+      ...defaultConfig.translations,
+      ...(raw.translations || {}),
+    },
     theme: {
       ...defaultConfig.theme,
       ...(raw.theme || {}),
@@ -51,15 +58,32 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
     hero: {
       ...defaultConfig.hero,
       ...(raw.hero || {}),
+      primaryButton: {
+        ...defaultConfig.hero.primaryButton,
+        ...(raw.hero?.primaryButton || {}),
+        label:
+          raw.hero?.primaryButton?.label || legacyPrimaryLabel,
+      },
+      secondaryButton: {
+        ...defaultConfig.hero.secondaryButton,
+        ...(raw.hero?.secondaryButton || {}),
+        label:
+          raw.hero?.secondaryButton?.label || legacySecondaryLabel,
+      },
       calibration:
         raw.hero?.calibration || defaultConfig.hero.calibration,
     },
+    steps: (raw.steps || defaultConfig.steps).map((item, index) => ({
+      ...defaultConfig.steps[index % defaultConfig.steps.length],
+      ...item,
+      icon:
+        item.icon || defaultConfig.steps[index % defaultConfig.steps.length].icon,
+    })),
     segments: (raw.segments || defaultConfig.segments).map((item, index) => ({
       ...defaultConfig.segments[index % defaultConfig.segments.length],
       ...item,
       icon:
-        item.icon ??
-        defaultConfig.segments[index % defaultConfig.segments.length].icon,
+        item.icon || defaultConfig.segments[index % defaultConfig.segments.length].icon,
       bullets: item.bullets || [],
     })),
     articles: {
@@ -71,6 +95,7 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
         ...defaultConfig.articles.cardStyle,
         ...(raw.articles?.cardStyle || {}),
       },
+      items: raw.articles?.items || defaultConfig.articles.items,
     },
     news: {
       ...defaultConfig.news,
@@ -81,6 +106,7 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
         ...defaultConfig.news.cardStyle,
         ...(raw.news?.cardStyle || {}),
       },
+      items: raw.news?.items || defaultConfig.news.items,
     },
     people: {
       ...defaultConfig.people,
@@ -91,6 +117,7 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
         ...defaultConfig.people.cardStyle,
         ...(raw.people?.cardStyle || {}),
       },
+      items: raw.people?.items || defaultConfig.people.items,
     },
     sections: defaultConfig.sections.map(section => {
       const saved = (raw.sections || []).find(item => item.id === section.id)
