@@ -70,8 +70,18 @@ function hydrate(raw: Partial<SiteConfig> | null): SiteConfig {
         label:
           raw.hero?.secondaryButton?.label || legacySecondaryLabel,
       },
-      calibration:
-        raw.hero?.calibration || defaultConfig.hero.calibration,
+      calibration: (raw.hero?.calibration || defaultConfig.hero.calibration).map((brand, brandIndex) => ({
+        ...defaultConfig.hero.calibration[brandIndex % defaultConfig.hero.calibration.length],
+        ...brand,
+        area: {
+          ...defaultConfig.hero.calibration[brandIndex % defaultConfig.hero.calibration.length].area,
+          ...(brand.area || {}),
+        },
+        products: (brand.products || defaultConfig.hero.calibration[brandIndex % defaultConfig.hero.calibration.length].products || []).map((product, productIndex) => ({
+          ...defaultConfig.hero.calibration[brandIndex % defaultConfig.hero.calibration.length].products[productIndex % Math.max(1, defaultConfig.hero.calibration[brandIndex % defaultConfig.hero.calibration.length].products.length)],
+          ...product,
+        })),
+      })),
     },
     steps: (raw.steps || defaultConfig.steps).map((item, index) => ({
       ...defaultConfig.steps[index % defaultConfig.steps.length],

@@ -976,6 +976,116 @@
   }
 }
 
+
+/* =========================================================
+   HERO CALIBRATION — BRAND + VARIETY/SKU BOXES
+   ========================================================= */
+
+.hero-calibration-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.hero-calibration-editor-card {
+  padding: 14px;
+  border: 1px solid #dfe5e9;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.hero-calibration-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hero-calibration-card-head > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.hero-calibration-card-head strong {
+  font-size: 13px;
+}
+
+.hero-calibration-card-head span {
+  font-size: 12px;
+  opacity: .68;
+}
+
+.hero-calibration-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hero-calibration-card-actions button {
+  margin: 0;
+}
+
+.hero-calibration-card-actions .danger-button {
+  border-color: #d7a4a0;
+}
+
+.hero-calibration-selector {
+  min-width: 190px;
+  margin: 0;
+}
+
+.hero-calibration-product-box {
+  position: absolute;
+  z-index: 5;
+  box-sizing: border-box;
+  border: 2px dashed currentColor;
+  background: rgba(78, 202, 206, .10);
+  cursor: pointer;
+}
+
+.hero-calibration-product-box span {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  max-width: calc(100% - 6px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: rgba(15, 58, 90, .86);
+  color: #fff;
+  font: 10px/1.2 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+
+.hero-calibration-product-box.selected {
+  border-style: solid;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.90), 0 0 0 4px rgba(255,90,54,.65);
+  background: rgba(255, 90, 54, .10);
+}
+
+.hero-calibration-empty {
+  margin: 12px 0 0;
+  padding: 12px;
+  border-radius: 6px;
+  background: #f7f9fa;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .hero-calibration-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .hero-calibration-selector {
+    width: 100%;
+  }
+}
+
 /* =========================================================
    TRANSLATION CONTROLS + IMAGE ICONS + HERO BUTTONS
    ========================================================= */

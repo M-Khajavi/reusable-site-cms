@@ -1202,10 +1202,26 @@ function HeroCalibration({
   config: SiteConfig
   update: (f: (c: SiteConfig) => void) => void
 }) {
-  const [selected, setSelected] = useState(0)
+  const [selectedBrand, setSelectedBrand] = useState(0)
+  const [selectedVariety, setSelectedVariety] = useState(0)
   const [showGrid, setShowGrid] = useState(true)
   const [showGuides, setShowGuides] = useState(true)
-  const brand = config.hero.calibration?.[selected]
+
+  const calibration = config.hero.calibration || []
+  const brand = calibration[selectedBrand]
+  const varieties = brand?.products || []
+  const variety = varieties[selectedVariety]
+
+  useEffect(() => {
+    if (selectedBrand >= calibration.length) {
+      setSelectedBrand(Math.max(0, calibration.length - 1))
+      setSelectedVariety(0)
+      return
+    }
+    if (selectedVariety >= varieties.length) {
+      setSelectedVariety(Math.max(0, varieties.length - 1))
+    }
+  }, [selectedBrand, selectedVariety, calibration.length, varieties.length])
 
   if (!brand) {
     return (
@@ -1215,23 +1231,60 @@ function HeroCalibration({
     )
   }
 
-  const updateArea = (
+  const updateBrandArea = (
     key: 'x' | 'y' | 'w' | 'h',
     value: number,
   ) => {
     update(draft => {
-      const selectedBrand = draft.hero.calibration?.[selected]
-      if (selectedBrand) {
-        selectedBrand.area[key] = value
-      }
+      const item = draft.hero.calibration?.[selectedBrand]
+      if (item) item.area[key] = value
     })
+  }
+
+  const updateVarietyArea = (
+    key: 'x' | 'y' | 'w' | 'h',
+    value: number,
+  ) => {
+    update(draft => {
+      const item = draft.hero.calibration?.[selectedBrand]?.products?.[selectedVariety]
+      if (item) item[key] = value
+    })
+  }
+
+  const addVariety = () => {
+    update(draft => {
+      const item = draft.hero.calibration?.[selectedBrand]
+      if (!item) return
+      const index = item.products.length
+      item.products.push({
+        variant: `Variety ${index + 1}`,
+        x: Math.min(90, item.area.x + index * 2),
+        y: item.area.y + 1,
+        w: Math.max(2, Math.min(12, item.area.w / Math.max(1, index + 1))),
+        h: Math.max(5, Math.min(90, item.area.h - 2)),
+      })
+      setSelectedVariety(index)
+    })
+  }
+
+  const removeVariety = () => {
+    if (!variety) return
+    update(draft => {
+      const item = draft.hero.calibration?.[selectedBrand]
+      if (!item || !item.products[selectedVariety]) return
+      item.products.splice(selectedVariety, 1)
+    })
+    setSelectedVariety(Math.max(0, selectedVariety - 1))
   }
 
   return (
     <div className="hero-calibration">
       <div className="hero-calibration-heading">
         <strong>Hero Calibration</strong>
-        <span>Align brand detection boxes with the actual shelf image.</span>
+        <span>
+          Calibrate the brand detection area and each individual variety / SKU box.
+          The public hero animation uses both levels.
+        </span>
       </div>
 
       <div className="hero-calibration-toolbar">
@@ -1253,16 +1306,41 @@ function HeroCalibration({
           Show guide lines
         </label>
 
-        <select
-          value={selected}
-          onChange={event => setSelected(Number(event.target.value))}
-        >
-          {config.hero.calibration.map((item, index) => (
-            <option key={`${item.name}-${index}`} value={index}>
-              {item.name}
-            </option>
-          ))}
-        </select>
+        <label className="admin-field hero-calibration-selector">
+          <span>Brand</span>
+          <select
+            value={selectedBrand}
+            onChange={event => {
+              setSelectedBrand(Number(event.target.value))
+              setSelectedVariety(0)
+            }}
+          >
+            {calibration.map((item, index) => (
+              <option key={`${item.name}-${index}`} value={index}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="admin-field hero-calibration-selector">
+          <span>Variety / SKU</span>
+          <select
+            value={varieties.length ? selectedVariety : ''}
+            disabled={!varieties.length}
+            onChange={event => setSelectedVariety(Number(event.target.value))}
+          >
+            {varieties.length === 0 ? (
+              <option value="">No varieties</option>
+            ) : (
+              varieties.map((item, index) => (
+                <option key={`${item.variant}-${index}`} value={index}>
+                  {item.variant || `Variety ${index + 1}`}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
       </div>
 
       <div className="hero-calibration-preview">
@@ -1289,12 +1367,10 @@ function HeroCalibration({
           </div>
         )}
 
-        {config.hero.calibration.map((item, index) => (
+        {calibration.map((item, index) => (
           <div
             key={`${item.name}-${index}`}
-            className={`hero-calibration-box ${
-              index === selected ? 'selected' : ''
-            }`}
+            className={`hero-calibration-box ${index === selectedBrand ? 'selected' : ''}`}
             style={{
               left: `${item.area.x}%`,
               top: `${item.area.y}%`,
@@ -1302,29 +1378,114 @@ function HeroCalibration({
               height: `${item.area.h}%`,
               borderColor: item.color,
             }}
-            onClick={() => setSelected(index)}
+            onClick={() => {
+              setSelectedBrand(index)
+              setSelectedVariety(0)
+            }}
+            title="Brand area"
           >
             <span>{item.name}</span>
           </div>
         ))}
+
+        {brand.products.map((item, index) => (
+          <div
+            key={`${item.variant}-${index}`}
+            className={`hero-calibration-product-box ${index === selectedVariety ? 'selected' : ''}`}
+            style={{
+              left: `${item.x}%`,
+              top: `${item.y}%`,
+              width: `${item.w}%`,
+              height: `${item.h}%`,
+              borderColor: brand.color,
+            }}
+            onClick={event => {
+              event.stopPropagation()
+              setSelectedVariety(index)
+            }}
+            title={item.variant || `Variety ${index + 1}`}
+          >
+            <span>{item.variant || `Variety ${index + 1}`}</span>
+          </div>
+        ))}
       </div>
 
-      <div className="hero-calibration-values">
-        {(['x', 'y', 'w', 'h'] as const).map(key => (
-          <label key={key}>
-            {key === 'w' ? 'Width' : key === 'h' ? 'Height' : key.toUpperCase()}
-            <input
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-              value={brand.area[key]}
-              onChange={event =>
-                updateArea(key, Number(event.target.value))
-              }
-            />
-          </label>
-        ))}
+      <div className="hero-calibration-editor-grid">
+        <div className="hero-calibration-editor-card">
+          <div className="hero-calibration-card-head">
+            <div>
+              <strong>Brand area</strong>
+              <span>{brand.name}</span>
+            </div>
+          </div>
+          <div className="hero-calibration-values">
+            {(['x', 'y', 'w', 'h'] as const).map(key => (
+              <label key={key}>
+                {key === 'w' ? 'Width' : key === 'h' ? 'Height' : key.toUpperCase()}
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={brand.area[key]}
+                  onChange={event => updateBrandArea(key, Number(event.target.value))}
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="hero-calibration-editor-card">
+          <div className="hero-calibration-card-head">
+            <div>
+              <strong>Variety / SKU area</strong>
+              <span>
+                {variety?.variant || 'Select or add a variety'}
+              </span>
+            </div>
+            <div className="hero-calibration-card-actions">
+              <button type="button" onClick={addVariety}>Add variety</button>
+              <button type="button" className="danger-button" disabled={!variety} onClick={removeVariety}>
+                Remove
+              </button>
+            </div>
+          </div>
+
+          {variety ? (
+            <>
+              <Field
+                label="Variety / SKU name"
+                value={variety.variant}
+                onChange={value =>
+                  update(draft => {
+                    const item = draft.hero.calibration?.[selectedBrand]?.products?.[selectedVariety]
+                    if (item) item.variant = value
+                  })
+                }
+                translationKey={`hero.calibration.${selectedBrand}.products.${selectedVariety}.variant`}
+              />
+              <div className="hero-calibration-values">
+                {(['x', 'y', 'w', 'h'] as const).map(key => (
+                  <label key={key}>
+                    {key === 'w' ? 'Width' : key === 'h' ? 'Height' : key.toUpperCase()}
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={variety[key]}
+                      onChange={event => updateVarietyArea(key, Number(event.target.value))}
+                    />
+                  </label>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="hero-calibration-empty">
+              This brand has no calibrated varieties yet. Click <strong>Add variety</strong> to create one.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
